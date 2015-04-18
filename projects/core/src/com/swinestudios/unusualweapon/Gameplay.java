@@ -26,6 +26,8 @@ public class Gameplay implements GameScreen{
 	public ArrayList<Bubble> bubbles;
 
 	public Player player;
+	
+	public CaveSystem cave;
 
 	@Override
 	public int getId(){
@@ -60,6 +62,9 @@ public class Gameplay implements GameScreen{
 		player = new Player(320, 240, this);
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
+		
+		cave = new CaveSystem(0, 0, this);
+		cave.addTerrain();
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
