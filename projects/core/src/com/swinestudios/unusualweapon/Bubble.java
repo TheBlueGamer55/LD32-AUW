@@ -41,8 +41,16 @@ public class Bubble {
 		float c = (float) Math.pow(Math.pow(targetX-startX, 2) + Math.pow(targetY-startY, 2), 0.5);
 		float xComponent = (targetX-startX)/c;
 		float yComponent = (targetY-startY)/c;
-		this.velX = NET_VELOCITY * xComponent;
-		this.velY = NET_VELOCITY * yComponent;
+		
+		float offset = (float) (Math.toRadians(30.0 * (Math.random() * 2 - 1.0)));
+		float cs = (float) Math.cos(offset);
+		float sn = (float) Math.sin(offset);
+		
+		float px = xComponent * cs - yComponent * sn;
+		float py = xComponent * sn + yComponent * cs;
+		
+		this.velX = NET_VELOCITY * px;
+		this.velY = NET_VELOCITY * py;
 		accelX = 0;
 		accelY = -0.009f;
 		isActive = false;
