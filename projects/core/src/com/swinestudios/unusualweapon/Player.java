@@ -92,7 +92,7 @@ public class Player{
 		hitbox.setY(this.y);
 		
 		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){//On left-click, fire a bubble. The rate will need to be limited in the future.
-			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX(), Gdx.input.getY(), this.level));
+			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
 		}
 	}
 
