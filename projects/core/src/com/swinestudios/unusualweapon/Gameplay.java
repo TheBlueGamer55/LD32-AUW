@@ -22,6 +22,7 @@ public class Gameplay implements GameScreen{
 	public float camY;
 	
 	public ArrayList<Rectangle> solids;
+	public ArrayList<Bubble> bubbles;
 	
 	public Player player;
 
@@ -52,6 +53,7 @@ public class Gameplay implements GameScreen{
 	@Override
 	public void preTransitionIn(Transition t){
 		solids = new ArrayList<Rectangle>();
+		bubbles = new ArrayList<Bubble>();
 		solids.add(new Rectangle(100, 200, 16, 120));
 		
 		player = new Player(320, 240, this);
@@ -70,13 +72,21 @@ public class Gameplay implements GameScreen{
 		g.drawString("This is the gameplay screen", 320, 240);
 		renderSolids(g);
 		player.render(g);
+		
+		for(int i = 0; i<bubbles.size(); i++){
+			bubbles.get(i).render( g );
+		}
 	}
 
 	@Override
 	public void update(GameContainer gc, ScreenManager<? extends GameScreen> sm, float delta){
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
-		player.update(delta);		
+		player.update(delta);	
+		
+		for(int i = 0; i<bubbles.size(); i++){
+			bubbles.get(i).update(delta);
+		}
 		
 		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
 			sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());

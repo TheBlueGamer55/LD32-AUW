@@ -4,16 +4,18 @@ import org.mini2Dx.core.geom.Rectangle;
 import org.mini2Dx.core.graphics.Graphics;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
-public class Player{ 
-
+public class Bubble {
+	
+	public final float NET_VELOCITY = 1.5f;
+	
+	
 	public float x, y;
 	public float velX, velY;
-	public float accelX, accelY;
+	public float accelX;
+	public float accelY = -1f;
 
 	public final float frictionX = 0.4f;
 	public final float frictionY = 0.4f;
@@ -26,79 +28,48 @@ public class Player{
 
 	public boolean isActive;
 
-	public boolean facingRight, facingLeft;
 
 	public Rectangle hitbox;
 	public Gameplay level;
 	public String type;
-
-	//Controls/key bindings
-	public final int LEFT = Keys.LEFT;
-	public final int RIGHT = Keys.RIGHT;
-	public final int UP = Keys.UP;
-	public final int DOWN = Keys.DOWN;
-
-	public Player(float x, float y, Gameplay level){
-		this.x = x;
-		this.y = y;
-		hitbox = new Rectangle(x, y, 32, 32); 
-		velX = 0;
-		velY = 0;
+	
+	public Bubble(float startX, float startY, float targetX, float targetY, Gameplay level){
+		System.out.println(startX + " " + startY + " " + targetX + " " + targetY);
+		hitbox = new Rectangle(x, y, 16, 16); 
+		this.x = startX-this.hitbox.width/2;
+		this.y = startY-this.hitbox.height/2;
+		float c = (float) Math.pow(Math.pow(targetX-startX, 2) + Math.pow(targetY-startY, 2), 0.5);
+		float xComponent = (targetX-startX)/c;
+		float yComponent = (targetY-startY)/c;
+		this.velX = NET_VELOCITY * xComponent;
+		this.velY = NET_VELOCITY * yComponent;
 		accelX = 0;
-		accelY = 0;
+		accelY = -0.009f;
 		isActive = false;
 		this.level = level;
-		type = "Player";
+		type = "Bubble";
 	}
-
+	
 	public void render(Graphics g){
-		g.setColor(Color.WHITE);
-		g.drawRect(x, y, 32, 32);
+		g.setColor(Color.RED);
+		g.drawRect(x, y, this.hitbox.width, this.hitbox.height);
 	}
-
+	
+	
 	public void update(float delta){
 		accelX = 0;
-		accelY = 0;
 
-		//Move Left
-		if(Gdx.input.isKeyPressed(this.LEFT) && velX > -maxSpeedX){
-			accelX = -moveSpeedX;
-		}
-		//Move Right
-		if(Gdx.input.isKeyPressed(this.RIGHT) && velX < maxSpeedX){
-			accelX = moveSpeedX;
-		}
-		//Move Up
-		if(Gdx.input.isKeyPressed(this.UP) && velY > -maxSpeedY){
-			accelY = -moveSpeedY;
-		}
-		//Move Down
-		if(Gdx.input.isKeyPressed(this.DOWN) && velY < maxSpeedY){
-			accelY = moveSpeedY;
-		}
 
-		//Apply friction when not moving or when exceeding the max horizontal speed
-		if(Math.abs(velX) > maxSpeedX || !Gdx.input.isKeyPressed(this.LEFT) && !Gdx.input.isKeyPressed(this.RIGHT)){
-			friction(true, false);
-		}
-		//Apply friction when not moving or when exceeding the max vertical speed
-		if(Math.abs(velY) > maxSpeedY || !Gdx.input.isKeyPressed(this.UP) && !Gdx.input.isKeyPressed(this.DOWN)){
-			friction(false, true);
-		}
 
-		limitSpeed(true, true);
+		//friction(true, true);
+
+		limitSpeed(true, false);
 		move();
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
-		
-		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){//On left-click, fire a bubble. The rate will need to be limited in the future.
-			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX(), Gdx.input.getY(), this.level));
-		}
 	}
-
-	/*
-	 * Checks if there is a collision if the player was at the given position.
-	 */
+	
+	
 	public boolean isColliding(Rectangle other, float x, float y){
 		if(other == this.hitbox){ //Make sure solid isn't stuck on itself
 			return false;
@@ -249,6 +220,4 @@ public class Player{
 			s[i].flip(false, true);
 		}
 	}
-
 }
-
