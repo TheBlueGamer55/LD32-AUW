@@ -28,6 +28,11 @@ public class Player implements InputProcessor{
 	public boolean isActive;
 
 	public boolean facingRight, facingLeft;
+	
+	public final int totalBubbleAmmo = 8;
+	public int bubbleAmmo = 8;
+	public final float totalReloadTime = 10;
+	public float elapsedReloadTime = 0;
 
 	public Rectangle hitbox;
 	public Gameplay level;
@@ -53,6 +58,15 @@ public class Player implements InputProcessor{
 	}
 
 	public void render(Graphics g){
+		g.setColor(Color.GREEN);
+		if(bubbleAmmo == 0){
+			g.setColor(Color.RED);
+		}
+
+		//these two lines are the ammo/reload indicators.
+		g.drawRect(16 + level.camX, 16 + level.camY, 64, 16);
+		g.fillRect(16 + level.camX, 16 + level.camY, 64 * (float) (bubbleAmmo != totalBubbleAmmo ? (float)elapsedReloadTime / totalReloadTime : 1), 16);
+
 		g.setColor(Color.WHITE);
 		g.drawRect(x, y, 32, 32);
 	}
@@ -92,8 +106,18 @@ public class Player implements InputProcessor{
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
 		
-		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){//On left-click, fire a bubble. The rate will need to be limited in the future.
-			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
+		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && bubbleAmmo > 0){//On left-click, fire a bubble. The rate will need to be limited in the future.
+			
+				level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
+				bubbleAmmo--;
+		}
+		
+		else if(bubbleAmmo == 0){//making this "else if" saves on performance a tiny bit
+			elapsedReloadTime += delta;
+			if(elapsedReloadTime >= totalReloadTime){
+				bubbleAmmo = totalBubbleAmmo;
+				elapsedReloadTime = 0;
+			}
 		}
 	}
 

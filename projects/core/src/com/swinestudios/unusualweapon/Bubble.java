@@ -34,7 +34,7 @@ public class Bubble {
 	public String type;
 	
 	public Bubble(float startX, float startY, float targetX, float targetY, Gameplay level){
-		System.out.println(startX + " " + startY + " " + targetX + " " + targetY);
+		//System.out.println(startX + " " + startY + " " + targetX + " " + targetY);
 		hitbox = new Rectangle(x, y, 16, 16); 
 		this.x = startX-this.hitbox.width/2;
 		this.y = startY-this.hitbox.height/2;
