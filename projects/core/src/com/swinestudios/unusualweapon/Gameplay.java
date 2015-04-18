@@ -18,6 +18,9 @@ public class Gameplay implements GameScreen{
 	
 	public static int ID = 2;
 	
+	public float camX;
+	public float camY;
+	
 	public ArrayList<Rectangle> solids;
 	
 	public Player player;
@@ -52,6 +55,8 @@ public class Gameplay implements GameScreen{
 		solids.add(new Rectangle(100, 200, 16, 120));
 		
 		player = new Player(320, 240, this);
+		camX = player.x - Gdx.graphics.getWidth() / 2;
+		camY = player.y - Gdx.graphics.getHeight() / 2;
 	}
 
 	@Override
@@ -61,6 +66,7 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void render(GameContainer gc, Graphics g){
+		g.translate((float) Math.round(camX), (float) Math.round(camY)); //camera movement
 		g.drawString("This is the gameplay screen", 320, 240);
 		renderSolids(g);
 		player.render(g);
@@ -68,6 +74,8 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void update(GameContainer gc, ScreenManager<? extends GameScreen> sm, float delta){
+		camX = player.x - Gdx.graphics.getWidth() / 2;
+		camY = player.y - Gdx.graphics.getHeight() / 2;
 		player.update(delta);		
 		
 		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
