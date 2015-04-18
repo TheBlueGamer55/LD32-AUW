@@ -13,17 +13,18 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
 
 public class Gameplay implements GameScreen{
-	
+
 	public static int ID = 2;
-	
+
 	public float camX;
 	public float camY;
-	
+
 	public ArrayList<Rectangle> solids;
 	public ArrayList<Bubble> bubbles;
-	
+
 	public Player player;
 
 	@Override
@@ -33,7 +34,7 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void initialise(GameContainer gc){
-		
+
 	}
 
 	@Override
@@ -42,12 +43,12 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void postTransitionIn(Transition t){
-		
+
 	}
 
 	@Override
 	public void postTransitionOut(Transition t){
-		
+
 	}
 
 	@Override
@@ -55,15 +56,20 @@ public class Gameplay implements GameScreen{
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
 		solids.add(new Rectangle(100, 200, 16, 120));
-		
+
 		player = new Player(320, 240, this);
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
+
+		//Input handling
+		InputMultiplexer multiplexer = new InputMultiplexer();
+		multiplexer.addProcessor(player);
+		Gdx.input.setInputProcessor(multiplexer);
 	}
 
 	@Override
 	public void preTransitionOut(Transition t){
-		
+
 	}
 
 	@Override
@@ -72,7 +78,7 @@ public class Gameplay implements GameScreen{
 		g.drawString("This is the gameplay screen", 320, 240);
 		renderSolids(g);
 		player.render(g);
-		
+
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).render( g );
 		}
@@ -83,16 +89,16 @@ public class Gameplay implements GameScreen{
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
 		player.update(delta);	
-		
+
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).update(delta);
 		}
-		
+
 		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
 			sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
 		}
 	}
-	
+
 	//Temporary helper method for testing
 	public void renderSolids(Graphics g){
 		for(int i = 0; i < solids.size(); i++){
