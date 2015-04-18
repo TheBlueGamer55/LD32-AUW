@@ -9,7 +9,7 @@ import com.swinestudios.unusualweapon.UnusualWeaponGame;
 public class DesktopLauncher{
 	public static void main (String[] arg){		
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-        cfg.title = "Sword Fighting Game";
+        cfg.title = "To be named later";
         cfg.width = 640;
         cfg.height = 480;
         cfg.vSyncEnabled = true;
