@@ -88,6 +88,7 @@ public class Bubble {
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
 		
+
 		
 		if(this.velY == -0.009f){
 			framesAtZero++;

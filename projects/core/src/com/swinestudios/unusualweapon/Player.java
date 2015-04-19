@@ -28,23 +28,23 @@ public class Player implements InputProcessor{
 	public boolean isActive;
 
 	public boolean facingRight, facingLeft;
-	
+
 	public final int totalBubbleAmmo = 8;
 	public int bubbleAmmo = 8;
 	public final float totalReloadTime = 10;
 	public float elapsedReloadTime = 0;
-	
-	
+
+
 	//HEALTH AND HEALTHBAR STUFF
 	public float maxHealth = 100.0f;
 	public float health = maxHealth;
-	
+
 	public float healthBarMaxWidth = 200;
 	public float healthBarHeight = 16;
-	
+
 	//Obsolete - public float healthBarX = 400;
 	public float healthBarY = 16;
-	
+
 	public float healthBarRed = 0;
 	public float healthBarGreen = 0;
 	public float healthBarBlue = 0;
@@ -85,11 +85,11 @@ public class Player implements InputProcessor{
 
 		g.setColor(Color.WHITE);
 		g.drawRect(Gdx.graphics.getWidth() - (healthBarMaxWidth + 16) + level.camX, healthBarY + level.camY, healthBarMaxWidth, healthBarHeight);
-		
+
 		g.setColor(new Color(healthBarRed, healthBarGreen, healthBarBlue, 1.0f));
 		g.fillRect(Gdx.graphics.getWidth() - (healthBarMaxWidth + 16) + level.camX, healthBarY + level.camY, Global_Constants.minZero(healthBarMaxWidth * getHealthPercentage()), healthBarHeight);
-		
-		
+
+
 		g.setColor(Color.WHITE);
 		g.drawRect(x, y, 32, 32);
 	}
@@ -98,6 +98,59 @@ public class Player implements InputProcessor{
 		accelX = 0;
 		accelY = 0;
 
+		playerMovement();
+
+		//Apply friction when not moving or when exceeding the max horizontal speed
+		if(Math.abs(velX) > maxSpeedX || !Gdx.input.isKeyPressed(this.LEFT) && !Gdx.input.isKeyPressed(this.RIGHT)){
+			friction(true, false);
+		}
+		//Apply friction when not moving or when exceeding the max vertical speed
+		if(Math.abs(velY) > maxSpeedY || !Gdx.input.isKeyPressed(this.UP) && !Gdx.input.isKeyPressed(this.DOWN)){
+			friction(false, true);
+		}
+
+		limitSpeed(true, true);
+		move();
+		hitbox.setX(this.x);
+		hitbox.setY(this.y);
+
+		shooting(delta);
+
+		healthBarColoring();
+
+	}
+	
+	public void healthBarColoring(){
+		if( getHealthPercentage() == 1.0f ){
+			healthBarRed = 1.0f;
+			healthBarGreen = 1.0f;
+			healthBarBlue = 1.0f;
+		}
+		else{
+			healthBarRed = Global_Constants.minZero( (float) (1.0 - getHealthPercentage()) );
+			healthBarGreen = Global_Constants.minZero( (float) (getHealthPercentage()) );
+			healthBarBlue = 0;
+		}
+	}
+	
+	
+	public void shooting(float delta){//Handles shooting and reloading.
+		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && bubbleAmmo > 0){//On left-click, fire a bubble. The rate will need to be limited in the future.
+
+			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
+			bubbleAmmo--;
+		}
+
+		else if(bubbleAmmo == 0){//making this "else if" saves on performance a tiny bit
+			elapsedReloadTime += delta;
+			if(elapsedReloadTime >= totalReloadTime){
+				bubbleAmmo = totalBubbleAmmo;
+				elapsedReloadTime = 0;
+			}
+		}
+	}
+
+	public void playerMovement(){
 		//Move Left
 		if(Gdx.input.isKeyPressed(this.LEFT) && velX > -maxSpeedX){
 			accelX = -moveSpeedX;
@@ -114,47 +167,7 @@ public class Player implements InputProcessor{
 		if(Gdx.input.isKeyPressed(this.DOWN) && velY < maxSpeedY){
 			accelY = moveSpeedY;
 		}
-
-		//Apply friction when not moving or when exceeding the max horizontal speed
-		if(Math.abs(velX) > maxSpeedX || !Gdx.input.isKeyPressed(this.LEFT) && !Gdx.input.isKeyPressed(this.RIGHT)){
-			friction(true, false);
-		}
-		//Apply friction when not moving or when exceeding the max vertical speed
-		if(Math.abs(velY) > maxSpeedY || !Gdx.input.isKeyPressed(this.UP) && !Gdx.input.isKeyPressed(this.DOWN)){
-			friction(false, true);
-		}
-
-		limitSpeed(true, true);
-		move();
-		hitbox.setX(this.x);
-		hitbox.setY(this.y);
-		
-		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && bubbleAmmo > 0){//On left-click, fire a bubble. The rate will need to be limited in the future.
-			
-				level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
-				bubbleAmmo--;
-		}
-		
-		else if(bubbleAmmo == 0){//making this "else if" saves on performance a tiny bit
-			elapsedReloadTime += delta;
-			if(elapsedReloadTime >= totalReloadTime){
-				bubbleAmmo = totalBubbleAmmo;
-				elapsedReloadTime = 0;
-			}
-		}
-		
-		if( getHealthPercentage() == 1.0f ){
-			healthBarRed = 1.0f;
-			healthBarGreen = 1.0f;
-			healthBarBlue = 1.0f;
-		}
-		else{
-			healthBarRed = Global_Constants.minZero( (float) (1.0 - getHealthPercentage()) );
-			healthBarGreen = Global_Constants.minZero( (float) (getHealthPercentage()) );
-			healthBarBlue = 0;
-		}
 	}
-
 	/*
 	 * Checks if there is a collision if the player was at the given position.
 	 */
@@ -297,7 +310,7 @@ public class Player implements InputProcessor{
 		y += velY;
 		velY += accelY;
 	}
-	
+
 	public float getHealthPercentage(){
 		return(health/maxHealth);
 	}
@@ -312,7 +325,7 @@ public class Player implements InputProcessor{
 			s[i].flip(false, true);
 		}
 	}
-	
+
 	//========================================Input Methods==============================================
 
 	@Override
