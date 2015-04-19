@@ -10,6 +10,7 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 
 public class MainMenu implements GameScreen{
 	
@@ -52,6 +53,7 @@ public class MainMenu implements GameScreen{
 	@Override
 	public void render(GameContainer gc, Graphics g){
 		g.drawString("This is the main menu", 320, 240);
+		g.setBackgroundColor(new Color(26 / 255f, 168 / 255f, 146 / 255f, 0));
 	}
 
 	@Override
