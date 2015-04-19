@@ -14,6 +14,8 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Gameplay implements GameScreen{
 
@@ -28,6 +30,7 @@ public class Gameplay implements GameScreen{
 	public Player player;
 	
 	public CaveSystem cave;
+	public Sprite caveTile;
 
 	@Override
 	public int getId(){
@@ -36,7 +39,9 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void initialise(GameContainer gc){
-
+		caveTile = new Sprite(new Texture(Gdx.files.internal("testCaveTile16.png")));
+		caveTile.setOrigin(0, 0);
+		caveTile.flip(false, true);
 	}
 
 	@Override
@@ -80,8 +85,8 @@ public class Gameplay implements GameScreen{
 	@Override
 	public void render(GameContainer gc, Graphics g){
 		g.translate((float) Math.round(camX), (float) Math.round(camY)); //camera movement
-		g.drawString("This is the gameplay screen", 320, 240);
-		renderSolids(g);
+		renderCave(g);
+		//renderSolids(g);
 		player.render(g);
 
 		for(int i = 0; i<bubbles.size(); i++){
@@ -108,6 +113,19 @@ public class Gameplay implements GameScreen{
 	public void renderSolids(Graphics g){
 		for(int i = 0; i < solids.size(); i++){
 			solids.get(i).draw(g);
+		}
+	}
+	
+	/*
+	 * Draws cave tiles based on a generated cave system
+	 */
+	public void renderCave(Graphics g){
+		for(int i = 0; i < cave.terrain.length; i++){
+			for(int j = 0; j < cave.terrain[i].length; j++){
+				if(cave.terrain[i][j] == 1){
+					g.drawSprite(caveTile, cave.x + j * cave.tileSize, cave.y + i * cave.tileSize);
+				}
+			}
 		}
 	}
 

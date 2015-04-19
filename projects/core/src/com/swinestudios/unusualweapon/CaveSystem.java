@@ -44,8 +44,8 @@ public class CaveSystem{
 	/*
 	 * TODO Generates the terrain and saves it in the 2D array.
 	 * 
-	 * 0 = wall
-	 * 1 = empty
+	 * 1 = wall
+	 * 0 = empty
 	 */
 	public void generateTerrain(){
 		for(int[] row : terrain){ //make everything solid
