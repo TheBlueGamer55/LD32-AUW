@@ -88,6 +88,8 @@ public class Enemy {
 	
 	public void update(float delta){
 		
+		
+		
 		//System.out.println(x + " "  + y);
 		
 		if(distanceTo(level.player.hitbox) <= LEASH_DISTANCE){

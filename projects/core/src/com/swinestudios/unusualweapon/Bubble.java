@@ -11,6 +11,8 @@ public class Bubble {
 	
 	public final float NET_VELOCITY = 1.5f;
 	
+	public float framesAtZero = 0;
+	
 	
 	public final float LIFESPAN = 10f;
 	public float timeAlive = 0f;
@@ -85,6 +87,15 @@ public class Bubble {
 		move();
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
+		
+		
+		if(this.velY == -0.009f){
+			framesAtZero++;
+		}
+		
+		if(framesAtZero >= 2){
+			delete = true;
+		}
 	}
 	
 	
