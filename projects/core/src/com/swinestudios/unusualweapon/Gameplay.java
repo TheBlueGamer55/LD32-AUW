@@ -57,13 +57,13 @@ public class Gameplay implements GameScreen{
 	public void preTransitionIn(Transition t){
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
-		solids.add(new Rectangle(100, 200, 16, 120));
 
 		player = new Player(320, 240, this);
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
 		
-		cave = new CaveSystem(0, 0, this);
+		cave = new CaveSystem(-120, -120, this);
+		cave.generateTerrain();
 		cave.addTerrain();
 
 		//Input handling
