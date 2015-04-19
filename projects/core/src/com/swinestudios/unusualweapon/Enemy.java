@@ -98,6 +98,8 @@ public class Enemy {
 		friction(true, true);
 
 		limitSpeed(true, true);
+		bubbleContact();
+		bubbleEffect();
 		move();
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
@@ -113,6 +115,13 @@ public class Enemy {
 		g.setColor(Color.RED);
 		g.fillRect(x, y, this.hitbox.width, this.hitbox.height);
 		g.setColor(Color.WHITE);
+	}
+	
+	public void bubbleEffect(){
+		if(bubbled){
+			accelY = -0.705f;
+			accelX = 0f;
+		}
 	}
 
 	public void bubbleContact(){
