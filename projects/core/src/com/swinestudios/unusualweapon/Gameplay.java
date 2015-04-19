@@ -64,7 +64,7 @@ public class Gameplay implements GameScreen{
 		
 		cave = new CaveSystem(-120, -120, this);
 		cave.generateTerrain();
-		cave.addTerrain();
+		cave.addOptimizedTerrain();
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
