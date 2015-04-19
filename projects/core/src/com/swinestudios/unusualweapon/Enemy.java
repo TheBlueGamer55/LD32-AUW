@@ -4,25 +4,18 @@ import org.mini2Dx.core.geom.Rectangle;
 import org.mini2Dx.core.graphics.Graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 
-public class Bubble {
-	
-	public final float NET_VELOCITY = 1.5f;
-	
-	
-	public final float LIFESPAN = 10f;
-	public float timeAlive = 0f;
-	
+public class Enemy {
 	
 	public float x, y;
 	public float velX, velY;
-	public float accelX;
-	public float accelY = -1f;
+	public float accelX, accelY;
 
-	public final float frictionX = 0.4f;
-	public final float frictionY = 0.4f;
+	public final float frictionX = 0.7f;
+	public final float frictionY = 0.7f;
 
 	public final float moveSpeedX = 2.0f;
 	public final float moveSpeedY = 2.0f;
@@ -31,62 +24,132 @@ public class Bubble {
 	public final float maxSpeedY = 2.0f;
 
 	public boolean isActive;
+
+	public boolean facingRight, facingLeft;
+	
+	public final int totalBubbleAmmo = 8;
+	public int bubbleAmmo = 8;
+	public final float totalReloadTime = 10;
+	public float elapsedReloadTime = 0;
+	
+	
+	//PATHING STUFF
+	
+	public float timeSinceChange = 0;
+	public final float TIMETOCHANGE = 8f;
+	
+	public final float LEASH_DISTANCE = 100f;
+	public final float CHASING_ACCEL = 1f;
+	
+	public boolean chasing = false;//Whether or not it is actively trying to seek out the player.
+	
+	public boolean bubbled = false;
+	
+	//-------------------------------
+	
+	
+	//HEALTH AND HEALTHBAR STUFF
+	public float maxHealth = 100.0f;
+	public float health = maxHealth;
+	
+	public float healthBarMaxWidth = 200;
+	public float healthBarHeight = 16;
+	
+	//Obsolete - public float healthBarX = 400;
+	public float healthBarY = 16;
+	
+	public float healthBarRed = 0;
+	public float healthBarGreen = 0;
+	public float healthBarBlue = 0;
+	//-----------------------------------
+
 	public boolean delete = false;
-
-
+	
 	public Rectangle hitbox;
 	public Gameplay level;
 	public String type;
-	
-	public Bubble(float startX, float startY, float targetX, float targetY, Gameplay level){
-		//System.out.println(startX + " " + startY + " " + targetX + " " + targetY);
-		hitbox = new Rectangle(x, y, 16, 16); 
-		this.x = startX-this.hitbox.width/2;
-		this.y = startY-this.hitbox.height/2;
-		float c = (float) Math.pow(Math.pow(targetX-startX, 2) + Math.pow(targetY-startY, 2), 0.5);
-		float xComponent = (targetX-startX)/c;
-		float yComponent = (targetY-startY)/c;
-		
-		float offset = (float) (Math.toRadians(30.0 * (Math.random() * 2 - 1.0)));
-		float cs = (float) Math.cos(offset);
-		float sn = (float) Math.sin(offset);
-		
-		float px = xComponent * cs - yComponent * sn;
-		float py = xComponent * sn + yComponent * cs;
-		
-		this.velX = NET_VELOCITY * px;
-		this.velY = NET_VELOCITY * py;
+
+
+
+	public Enemy(float x, float y, float width, float height, Gameplay level){
+		this.x = x;
+		this.y = y;
+		hitbox = new Rectangle(x, y, width, height); 
+		velX = 0;
+		velY = 0;
 		accelX = 0;
-		accelY = -0.009f;
+		accelY = 0;
 		isActive = false;
 		this.level = level;
-		type = "Bubble";
+		type = "Enemy";
 	}
 	
-	public void render(Graphics g){
-		g.setColor(Color.RED);
-		g.drawRect(x, y, this.hitbox.width, this.hitbox.height);
-		g.setColor(Color.WHITE);
-	}
-	
+
 	
 	public void update(float delta){
-		accelX = 0;
-
-		timeAlive += delta;
-		if(timeAlive > LIFESPAN){
-			delete = true;
+		
+		//System.out.println(x + " "  + y);
+		
+		if(distanceTo(level.player.hitbox) <= LEASH_DISTANCE){
+			chasing = true;
+		}
+		else{
+			chasing = false;
+		}
+		
+		if(chasing == true){
+			accelX = CHASING_ACCEL * Global_Constants.unitVectorX(level.player.x - this.x, level.player.y - this.y);
+			accelY = CHASING_ACCEL * Global_Constants.unitVectorY(level.player.x - this.x, level.player.y - this.y);
 		}
 
+		timeSinceChange += delta;
 
-		//friction(true, true);
+		if(timeSinceChange >= TIMETOCHANGE && chasing == false){
+			System.out.println("Execute");
+			
+			timeSinceChange = 0;
+			switch(Global_Constants.random.nextInt(2)){
+				case 0:
+					swimLeft();
+					break;
+					
+				case 1:
+					swimRight();
+					break;
+					
+				default:
+					
+					//Do nothing, this shouldn't happen.
+				
+			}
+		}
+		
+		//Apply friction when not moving or when exceeding the max horizontal speed
+		friction(true, true);
 
-		limitSpeed(true, false);
+		limitSpeed(true, true);
 		move();
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
+		
 	}
 	
+	public void render(Graphics g){
+
+		
+		
+		g.setColor(Color.RED);
+		g.fillRect(x, y, this.hitbox.width, this.hitbox.height);
+		g.setColor(Color.WHITE);
+	}
+	
+	public void swimLeft(){
+		accelX = -1f;
+	}
+	
+	public void swimRight(){
+		accelX = 1f;
+	}
 	
 	public boolean isColliding(Rectangle other, float x, float y){
 		if(other == this.hitbox){ //Make sure solid isn't stuck on itself
@@ -97,10 +160,7 @@ public class Bubble {
 		}
 		return false;
 	}
-
-	/*
-	 * Helper method for checking whether there is a collision if the player moves at the given position
-	 */
+	
 	public boolean collisionExistsAt(float x, float y){
 		for(int i = 0; i < level.solids.size(); i++){
 			Rectangle solid = level.solids.get(i);
@@ -227,15 +287,7 @@ public class Bubble {
 		y += velY;
 		velY += accelY;
 	}
+	
 
-	/*
-	 * Sets up any images that the player may have. Necessary because images are flipped and have the origin
-	 * on the bottom-left by default.
-	 */
-	public void adjustSprite(Sprite... s){
-		for(int i = 0; i < s.length; i++){
-			s[i].setOrigin(0, 0);
-			s[i].flip(false, true);
-		}
-	}
+
 }

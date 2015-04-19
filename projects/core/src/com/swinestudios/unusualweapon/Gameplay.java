@@ -24,8 +24,11 @@ public class Gameplay implements GameScreen{
 
 	public ArrayList<Rectangle> solids;
 	public ArrayList<Bubble> bubbles;
+	public ArrayList<Enemy> enemies;
 
 	public Player player;
+	
+	public Enemy testEnemy;
 	
 	public CaveSystem cave;
 
@@ -57,8 +60,12 @@ public class Gameplay implements GameScreen{
 	public void preTransitionIn(Transition t){
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
+		enemies = new ArrayList<Enemy>();
 
 		player = new Player(320, 240, this);
+		testEnemy = new Enemy( 320, 240, 16, 16, this);
+		enemies.add(testEnemy);
+		
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
 		
@@ -87,6 +94,10 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).render( g );
 		}
+		
+		for(int i = 0; i<enemies.size(); i++){
+			enemies.get(i).render( g );
+		}
 	}
 
 	@Override
@@ -97,6 +108,16 @@ public class Gameplay implements GameScreen{
 
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).update(delta);
+			if(bubbles.get(i).delete == true){
+				bubbles.remove(i);
+			}
+		}
+		
+		for(int i = 0; i<enemies.size(); i++){
+			enemies.get(i).update(delta);
+			if(enemies.get(i).delete == true){
+				enemies.remove(i);
+			}
 		}
 
 		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
