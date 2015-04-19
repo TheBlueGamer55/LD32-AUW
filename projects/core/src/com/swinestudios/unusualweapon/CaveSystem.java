@@ -8,12 +8,6 @@ import org.mini2Dx.core.geom.Rectangle;
 
 public class CaveSystem{
 
-	/*public int[][] terrain = { {1, 0, 0, 1, 0}, //temporary
-			{1, 1, 0, 0, 0},
-			{1, 1, 0, 0, 0},
-			{1, 0, 0, 0, 1},
-			{1, 0, 0, 1, 1}};*/
-
 	public int[][] terrain;
 
 	public float x, y; //the top-left corner of the entire cave system
@@ -26,7 +20,7 @@ public class CaveSystem{
 	public Miner miner1;
 
 	public final int maxSteps = 500; //How many iterations each miner will carry out
-	public final int trimSteps = 3; //How many iterations of removing idle blocks
+	public final int trimSteps = 5; //How many iterations of removing idle blocks
 	public final int spawnChance = 10; //The percent probability of another miner spawning
 	public final int minimumNeighborsNeeded = 4; //The minimum # of neighbors needed for a solid to be removed
 
@@ -109,6 +103,10 @@ public class CaveSystem{
 					currentRun++;
 				}
 				else{ //the current run of solids is done
+					level.solids.add(new Rectangle(x + startRunX * tileSize, y + startRunY * tileSize, currentRun * tileSize, tileSize));
+					currentRun = 0;
+				}
+				if(j == terrain[i].length - 1){ //if on the right edge of the terrain
 					level.solids.add(new Rectangle(x + startRunX * tileSize, y + startRunY * tileSize, currentRun * tileSize, tileSize));
 					currentRun = 0;
 				}

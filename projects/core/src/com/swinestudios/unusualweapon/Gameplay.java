@@ -29,9 +29,10 @@ public class Gameplay implements GameScreen{
 	public ArrayList<Enemy> enemies;
 
 	public Player player;
-	
+	public boolean foundEmptySpace;
+
 	public Enemy testEnemy;
-	
+
 	public CaveSystem cave;
 	public Sprite caveTile;
 
@@ -63,6 +64,8 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void preTransitionIn(Transition t){
+		foundEmptySpace = false;
+		
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
 		enemies = new ArrayList<Enemy>();
@@ -70,13 +73,35 @@ public class Gameplay implements GameScreen{
 		player = new Player(320, 240, this);
 		testEnemy = new Enemy( 320, 240, 16, 16, this);
 		enemies.add(testEnemy);
-		
+
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
-		
+
 		cave = new CaveSystem(-120, -120, this);
 		cave.generateTerrain();
 		cave.addOptimizedTerrain();
+
+		for(int i = 1; i < cave.terrain.length - 1; i++){
+			for(int j = cave.terrain[i].length - 2; j > 0; j--){
+				//if the 3x3 space is empty, move the player here
+				if( cave.terrain[i][j] + 
+					cave.terrain[i][j+1] + 
+					cave.terrain[i][j-1] + 
+					cave.terrain[i+1][j] + 
+					cave.terrain[i-1][j] +
+					cave.terrain[i+1][j+1] +
+					cave.terrain[i+1][j-1] +
+					cave.terrain[i-1][j+1] +
+					cave.terrain[i-1][j-1] == 0){
+					player.x = cave.x + j * cave.tileSize + 4;
+					player.y = cave.y + i * cave.tileSize + 4;
+					foundEmptySpace = true;;
+				}
+			}
+			if(foundEmptySpace){
+				break;
+			}
+		}
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -99,7 +124,7 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).render( g );
 		}
-		
+
 		for(int i = 0; i<enemies.size(); i++){
 			enemies.get(i).render( g );
 		}
@@ -117,7 +142,7 @@ public class Gameplay implements GameScreen{
 				bubbles.remove(i);
 			}
 		}
-		
+
 		for(int i = 0; i<enemies.size(); i++){
 			enemies.get(i).update(delta);
 			if(enemies.get(i).delete == true){
@@ -136,7 +161,7 @@ public class Gameplay implements GameScreen{
 			solids.get(i).draw(g);
 		}
 	}
-	
+
 	/*
 	 * Draws cave tiles based on a generated cave system
 	 */
