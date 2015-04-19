@@ -44,8 +44,8 @@ public class CaveSystem{
 	/*
 	 * TODO Generates the terrain and saves it in the 2D array.
 	 * 
-	 * 0 = wall
-	 * 1 = empty
+	 * 1 = wall
+	 * 0 = empty
 	 */
 	public void generateTerrain(){
 		for(int[] row : terrain){ //make everything solid
@@ -87,6 +87,30 @@ public class CaveSystem{
 			for(int j = 0; j < terrain[i].length; j++){
 				if(terrain[i][j] == 1){ //if a solid
 					level.solids.add(new Rectangle(x + j * tileSize, y + i * tileSize, tileSize, tileSize));
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Adds the generated terrain to the level with some optimization.
+	 */
+	public void addOptimizedTerrain(){
+		for(int i = 0; i < terrain.length; i++){
+			int currentRun = 0;
+			int startRunX = 0;
+			int startRunY = 0;
+			for(int j = 0; j < terrain[i].length; j++){
+				if(terrain[i][j] == 1){ //if a solid
+					if(currentRun == 0){ //if starting a new run
+						startRunX = j;
+						startRunY = i;
+					}
+					currentRun++;
+				}
+				else{ //the current run of solids is done
+					level.solids.add(new Rectangle(x + startRunX * tileSize, y + startRunY * tileSize, currentRun * tileSize, tileSize));
+					currentRun = 0;
 				}
 			}
 		}
