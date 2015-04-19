@@ -81,7 +81,7 @@ public class Gameplay implements GameScreen{
 		cave.generateTerrain();
 		cave.addOptimizedTerrain();
 
-		for(int i = 1; i < cave.terrain.length - 1; i++){
+		for(int i = cave.terrain.length - 2; i > 0; i--){
 			for(int j = cave.terrain[i].length - 2; j > 0; j--){
 				//if the 3x3 space is empty, move the player here
 				if( cave.terrain[i][j] + 
@@ -93,8 +93,8 @@ public class Gameplay implements GameScreen{
 					cave.terrain[i+1][j-1] +
 					cave.terrain[i-1][j+1] +
 					cave.terrain[i-1][j-1] == 0){
-					player.x = cave.x + j * cave.tileSize + 4;
-					player.y = cave.y + i * cave.tileSize + 4;
+					player.x = cave.x + j * cave.tileSize - 8;
+					player.y = cave.y + i * cave.tileSize - 8;
 					foundEmptySpace = true;;
 				}
 			}
