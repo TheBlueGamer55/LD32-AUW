@@ -33,8 +33,8 @@ public class Enemy {
 	public float timeSinceChange = 0;
 	public final float TIMETOCHANGE = 8f;
 
-	public final float LEASH_DISTANCE = 100f;
-	public final float CHASING_ACCEL = 1f;
+	public final float LEASH_DISTANCE = 200f;
+	public final float CHASING_ACCEL = 2f;
 	public final float BURST_SPEED = 3f;
 
 	public boolean chasing = false;//Whether or not it is actively trying to seek out the player.
@@ -86,8 +86,8 @@ public class Enemy {
 
 	public void update(float delta){
 
-		accelX = 0;
-		accelY = 0;
+		//accelX = 0;
+		//accelY = 0;
 
 		pathing(delta);
 
@@ -175,10 +175,12 @@ public class Enemy {
 			timeSinceChange = 0;
 			switch(Global_Constants.random.nextInt(2)){
 			case 0:
+				System.out.println("LEFT");
 				swimLeft();
 				break;
 
 			case 1:
+				System.out.println("RIGHT");
 				swimRight();
 				break;
 
@@ -192,12 +194,12 @@ public class Enemy {
 	}
 
 	public void swimLeft(){
-		//accelX = -1f;
+		accelX = -2f;
 		velX = -BURST_SPEED;
 	}
 
 	public void swimRight(){
-		//accelX = 1f;
+		accelX = 2f;
 		velX = BURST_SPEED;
 	}
 
