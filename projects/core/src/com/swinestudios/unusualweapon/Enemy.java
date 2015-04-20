@@ -3,9 +3,6 @@ package com.swinestudios.unusualweapon;
 import org.mini2Dx.core.geom.Rectangle;
 import org.mini2Dx.core.graphics.Graphics;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 
 public class Enemy {
@@ -27,8 +24,6 @@ public class Enemy {
 
 	public boolean facingRight, facingLeft;
 
-	public final int totalBubbleAmmo = 8;
-	public int bubbleAmmo = 8;
 	public final float totalReloadTime = 10;
 	public float elapsedReloadTime = 0;
 

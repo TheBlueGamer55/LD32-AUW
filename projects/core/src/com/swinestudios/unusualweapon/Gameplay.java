@@ -1,5 +1,6 @@
 package com.swinestudios.unusualweapon;
 
+import java.awt.Point;
 import java.util.ArrayList;
 
 import org.mini2Dx.core.game.GameContainer;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Gameplay implements GameScreen{
 
@@ -34,7 +36,9 @@ public class Gameplay implements GameScreen{
 	public Enemy testEnemy;
 
 	public CaveSystem cave;
-	public Sprite caveTile;
+	public Sprite caveTileset;
+	public TextureRegion[][] tiles;
+	public Sprite[][] caveTiles;
 
 	@Override
 	public int getId(){
@@ -43,9 +47,19 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void initialise(GameContainer gc){
-		caveTile = new Sprite(new Texture(Gdx.files.internal("testCaveTile16.png")));
-		caveTile.setOrigin(0, 0);
-		caveTile.flip(false, true);
+		caveTileset = new Sprite(new Texture(Gdx.files.internal("underwaterCaveTileset.png")));
+		caveTileset.setOrigin(0, 0);
+		tiles = caveTileset.split(16, 16);
+		caveTiles = new Sprite[tiles.length][tiles[0].length];
+		caveTileset.flip(false, true);
+		for(int i = 0; i < tiles.length; i++){
+			for(int j = 0; j < tiles[i].length; j++){
+				tiles[i][j].flip(false, true);
+				caveTiles[i][j] = new Sprite(new TextureRegion(tiles[i][j]));
+				caveTiles[i][j].setSize(CaveSystem.tileSize, CaveSystem.tileSize);
+			}
+		}
+		//caveTileset.setSize(caveTileset.getWidth() * (CaveSystem.tileSize / 16), caveTileset.getHeight() * (CaveSystem.tileSize / 16));
 	}
 
 	@Override
@@ -70,38 +84,21 @@ public class Gameplay implements GameScreen{
 		bubbles = new ArrayList<Bubble>();
 		enemies = new ArrayList<Enemy>();
 
-		player = new Player(320, 240, this);
+		player = new Player(-150, -150, this);
 		testEnemy = new Enemy( 320, 240, 16, 16, this);
 		enemies.add(testEnemy);
 
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
 
-		cave = new CaveSystem(-120, -120, this);
+		cave = new CaveSystem(-100, -100, this);
 		cave.generateTerrain();
 		cave.addOptimizedTerrain();
 
-		for(int i = cave.terrain.length - 2; i > 0; i--){
-			for(int j = cave.terrain[i].length - 2; j > 0; j--){
-				//if the 3x3 space is empty, move the player here
-				if( cave.terrain[i][j] + 
-					cave.terrain[i][j+1] + 
-					cave.terrain[i][j-1] + 
-					cave.terrain[i+1][j] + 
-					cave.terrain[i-1][j] +
-					cave.terrain[i+1][j+1] +
-					cave.terrain[i+1][j-1] +
-					cave.terrain[i-1][j+1] +
-					cave.terrain[i-1][j-1] == 0){
-					player.x = cave.x + j * cave.tileSize - 8;
-					player.y = cave.y + i * cave.tileSize - 8;
-					foundEmptySpace = true;;
-				}
-			}
-			if(foundEmptySpace){
-				break;
-			}
-		}
+		ArrayList<Point> emptySpaces = cave.findEmptySpace();
+		int spawnIndex = Global_Constants.random.nextInt(emptySpaces.size());
+		player.x = (float)(cave.x + emptySpaces.get(spawnIndex).getX() * CaveSystem.tileSize);
+		player.y = (float)(cave.y + emptySpaces.get(spawnIndex).getY() * CaveSystem.tileSize);
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -169,7 +166,10 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i < cave.terrain.length; i++){
 			for(int j = 0; j < cave.terrain[i].length; j++){
 				if(cave.terrain[i][j] == 1){
-					g.drawSprite(caveTile, cave.x + j * cave.tileSize, cave.y + i * cave.tileSize);
+					int type = cave.tileTypes[i][j];
+					int row = type / 8; //the width of the tileset in tiles is 8
+					int col = type % 8;
+					g.drawSprite(caveTiles[row][col], cave.x + j * CaveSystem.tileSize, cave.y + i * CaveSystem.tileSize);
 				}
 			}
 		}

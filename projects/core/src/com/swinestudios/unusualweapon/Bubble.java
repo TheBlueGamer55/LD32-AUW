@@ -4,7 +4,7 @@ import org.mini2Dx.core.geom.Rectangle;
 import org.mini2Dx.core.graphics.Graphics;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Bubble {
@@ -39,6 +39,7 @@ public class Bubble {
 	public Rectangle hitbox;
 	public Gameplay level;
 	public String type;
+	public Sprite bubbleSprite;
 	
 	public Bubble(float startX, float startY, float targetX, float targetY, Gameplay level){
 		//System.out.println(startX + " " + startY + " " + targetX + " " + targetY);
@@ -63,12 +64,12 @@ public class Bubble {
 		isActive = false;
 		this.level = level;
 		type = "Bubble";
+		bubbleSprite = new Sprite(new Texture(Gdx.files.internal("bubble.png")));
+		adjustSprite(bubbleSprite);
 	}
 	
 	public void render(Graphics g){
-		g.setColor(Color.RED);
-		g.drawRect(x, y, this.hitbox.width, this.hitbox.height);
-		g.setColor(Color.WHITE);
+		g.drawSprite(bubbleSprite, x, y);
 	}
 	
 	

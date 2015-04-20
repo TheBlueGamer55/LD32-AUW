@@ -53,7 +53,7 @@ public class MainMenu implements GameScreen{
 	@Override
 	public void render(GameContainer gc, Graphics g){
 		g.drawString("This is the main menu", 320, 240);
-		g.setBackgroundColor(new Color(26 / 255f, 168 / 255f, 146 / 255f, 0));
+		g.setBackgroundColor(new Color(26 / 255f, 168 / 255f, 196 / 255f, 0));
 	}
 
 	@Override

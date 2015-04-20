@@ -1,5 +1,6 @@
 package com.swinestudios.unusualweapon;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -9,9 +10,10 @@ import org.mini2Dx.core.geom.Rectangle;
 public class CaveSystem{
 
 	public int[][] terrain;
+	public int[][] tileTypes;
 
 	public float x, y; //the top-left corner of the entire cave system
-	public final int tileSize = 16;
+	public static final int tileSize = 32; 
 
 	public Gameplay level;
 	public Random random;
@@ -29,8 +31,9 @@ public class CaveSystem{
 		this.y = y;
 		this.level = level;
 		terrain = new int[200][100]; //TODO temporary size
+		tileTypes = new int[terrain.length][terrain[0].length];
 		miners = new ArrayList<Miner>();
-		miner1 = new Miner(terrain.length / 2, terrain[0].length / 2);
+		miner1 = new Miner(terrain[0].length / 2, terrain.length / 2);
 		miners.add(miner1);
 		random = new Random();
 	}
@@ -54,7 +57,7 @@ public class CaveSystem{
 			}
 			int spawner = random.nextInt(100) + 1;
 			if(spawner <= spawnChance){
-				miners.add(new Miner(random.nextInt(terrain.length), random.nextInt(terrain[0].length)));
+				miners.add(new Miner(random.nextInt(terrain[0].length), random.nextInt(terrain.length)));
 			}
 		}
 		miners.clear();
@@ -63,11 +66,20 @@ public class CaveSystem{
 			trimTerrain();
 		}
 
-		//TODO temporary code to box in the terrain
+		//Box in the terrain
 		for(int i = 0; i < terrain.length; i++){
 			for(int j = 0; j < terrain[i].length; j++){
 				if(i == 0 || i == terrain.length - 1 || j == 0 || j == terrain[i].length -1){
 					terrain[i][j] = 1;
+				}
+			}
+		}
+		
+		//Initialize tile types
+		for(int i = 0; i < terrain.length; i++){
+			for(int j = 0; j < terrain[i].length; j++){
+				if(terrain[i][j] == 1){
+					tileTypes[i][j] = getTileType(j, i);
 				}
 			}
 		}
@@ -85,7 +97,7 @@ public class CaveSystem{
 			}
 		}
 	}
-	
+
 	/*
 	 * Adds the generated terrain to the level with some optimization.
 	 */
@@ -143,6 +155,29 @@ public class CaveSystem{
 		}
 	}
 
+	/*
+	 * Returns a list of all coordinates in the terrain that are the center of a 3 x 3 empty square.
+	 */
+	public ArrayList<Point> findEmptySpace(){
+		ArrayList<Point> list = new ArrayList<Point>();
+		for(int i = 2; i < terrain.length - 2; i++){
+			for(int j = 2; j < terrain[i].length - 2; j++){
+				if( terrain[i][j] + 
+						terrain[i][j+1] + 
+						terrain[i][j-1] + 
+						terrain[i+1][j] + 
+						terrain[i-1][j] +
+						terrain[i+1][j+1] +
+						terrain[i+1][j-1] +
+						terrain[i-1][j+1] +
+						terrain[i-1][j-1] == 0){
+					list.add(new Point(j, i));
+				}
+			}
+		}
+		return list;
+	}
+
 	class Miner{
 
 		public int x, y;
@@ -186,6 +221,12 @@ public class CaveSystem{
 				terrain[y][x] = 0;
 			}
 
+			//Remove any miners that hit an edge
+			if(x == 0 || y == 0 || x == terrain[0].length - 1 || y == terrain.length - 1){
+				isActive = false;
+				miners.remove(this);
+			}
+
 			/* TODO not sure if needed or not
 			int leftX = Math.abs((x - 1) % terrain[0].length);
 			int rightX = Math.abs((x + 1) % terrain[0].length);
@@ -206,6 +247,216 @@ public class CaveSystem{
 			}*/
 		}
 
+	}
+
+	/*
+	 * Returns the type of "tile" a given coordinate is. Used for auto-tiling.
+	 * 
+	 * Credit to Nocturne, modifications by ShaunJS, further modified by pigrocket and TheBlueGamer55
+	 */
+	public int getTileType(int x, int y){
+		int tile;
+
+		boolean w_left, w_right, w_up, w_down, w_upleft, w_downleft, w_upright, w_downright;
+
+		int iw = 1; 
+		
+		if(x - iw < 0 && y - iw < 0){ //top-left corner
+			w_left = true; w_upleft = true; w_downleft = true; w_up = true; w_upright = true;
+			w_right = terrain[y][x+iw] == 1; 
+			w_downright = terrain[y+iw][x+iw] == 1;
+			w_down = terrain[y+iw][x] == 1; 
+		}
+		else if(x - iw < 0 && y + iw > terrain.length - 1){ //bottom-left corner
+			w_left = true; w_upleft = true; w_downleft = true; w_down = true; w_downright = true;
+			w_up = terrain[y-iw][x] == 1;
+			w_upright = terrain[y-iw][x+iw] == 1; 
+			w_right = terrain[y][x+iw] == 1; 
+		}
+		else if(x + iw > terrain[0].length - 1 && y - iw < 0){ //top-right corner
+			w_right = true; w_upright = true; w_downright = true; w_up = true; w_upleft = true;
+			w_left = terrain[y][x-iw] == 1;
+			w_downleft = terrain[y+iw][x-iw] == 1;
+			w_down = terrain[y+iw][x] == 1; 
+		}
+		else if(x + iw > terrain[0].length - 1 && y + iw > terrain.length - 1){ //bottom-right corner
+			w_down = true; w_downleft = true; w_downright = true; w_right = true; w_upright = true;
+			w_up = terrain[y-iw][x] == 1; 
+			w_upleft = terrain[y-iw][x-iw] == 1; 
+			w_left = terrain[y][x-iw] == 1;
+		}
+		
+		else if (x-iw < 0) { //left edge
+			w_left = true; w_upleft = true; w_downleft = true;
+			w_up = terrain[y-iw][x] == 1;
+			w_upright = terrain[y-iw][x+iw] == 1; 
+			w_right = terrain[y][x+iw] == 1; 
+			w_downright = terrain[y+iw][x+iw] == 1; 
+			w_down = terrain[y+iw][x] == 1;
+		} 
+		else if (x+iw > terrain[0].length - 1) { //right edge
+			w_right = true; w_upright = true; w_downright = true;
+			w_up = terrain[y-iw][x] == 1;
+			w_upleft = terrain[y-iw][x-iw] == 1; 
+			w_left = terrain[y][x-iw] == 1;
+			w_downleft = terrain[y+iw][x-iw] == 1;
+			w_down = terrain[y+iw][x] == 1;
+		} 
+		else if (y-iw < 0) { //top edge
+			w_up = true; w_upright = true; w_upleft = true;
+			w_left = terrain[y][x-iw] == 1;
+			w_downleft = terrain[y+iw][x-iw] == 1;
+			w_down = terrain[y+iw][x] == 1; 
+			w_right = terrain[y][x+iw] == 1; 
+			w_downright = terrain[y+iw][x+iw] == 1;
+		}
+		else if (y+iw > terrain.length - 1) { //bottom edge
+			w_down = true; w_downright = true; w_downleft = true;
+			w_left = terrain[y][x-iw] == 1;
+			w_up = terrain[y-iw][x] == 1;
+			w_upleft = terrain[y-iw][x-iw] == 1;
+			w_upright = terrain[y-iw][x+iw] == 1; 
+			w_right = terrain[y][x+iw] == 1; 
+		} 
+		else{ //in the middle
+			w_left = terrain[y][x-iw] == 1; 
+			w_right = terrain[y][x+iw] == 1; 
+			w_up = terrain[y-iw][x] == 1; 
+			w_down = terrain[y+iw][x] == 1; 
+			w_upleft = terrain[y-iw][x-iw] == 1; 
+			w_downleft = terrain[y+iw][x-iw] == 1; 
+			w_upright = terrain[y-iw][x+iw] == 1; 
+			w_downright = terrain[y+iw][x+iw] == 1;
+		}
+
+		//Tile values are based on this specific tileset
+		tile = 30;
+		if(w_up) //top
+		{ 
+			tile = 27;
+			if(w_right) //top, right
+			{ 
+				tile = 40;
+				if(w_down) //top, right, down
+				{ 
+					tile = 44;
+					if(w_left) //top, right, down, left
+					{ 
+						tile = 15;
+						if(w_upright) //top, right, down, left, top-right
+						{ 
+							tile = 13;
+							if(w_downright) //top, right, down, left, top-right, down-right
+							{ 
+								tile = 8;
+								if(w_downleft) //top, right, down, left, top-right, down-right, down-left
+								{ 
+									tile = 1;
+									if(w_upleft) tile = 0; //all 8 sides
+								} 
+								else if(w_upleft) tile = 4; //top, right, down, left, top-right, down-right, up-left
+							} 
+							else if(w_downleft) //top, right, down, left, top-right, down-left
+							{ 
+								tile = 9;
+								if(w_upleft) tile = 3; //top, right, down, left, top-right, down-left, top-left
+							} 
+							else if(w_upleft) tile = 7; //top, right, down, left, top-right, top-left
+						} 
+						else if(w_downright) //top, right, down, left, down-right
+						{ 
+							tile = 14;
+							if(w_downleft) //top, right, down, left, down-right, down-left
+							{ 
+								tile = 5;
+								if(w_upleft) tile = 2; //top, right, down, left, down-right, down-left, up-left
+							} 
+							else if(w_upleft) tile = 10; //top, right, down, left, down-right, up-left
+						} 
+						else if(w_downleft) //top, right, down, left, down-left
+						{ 
+							tile = 11; 
+							if(w_upleft) tile = 6; //top, right, down, left, down-left, up-left
+						} 
+						else if(w_upleft)tile = 12; //top, right, down, left, up-left
+					} 
+					else if(w_upright) //top, right, down, up-right
+					{ 
+						tile = 33;
+						if(w_downright)tile = 19; //top, right, down, up-right, down-right
+					} 
+					else if(w_downright)tile = 36; //top, right, down, down-right
+				} 
+				else if(w_left) //top, right, left
+				{ 
+					tile = 43;
+					if(w_upright) //top, right, left, up-right
+					{ 
+						tile = 35;
+						if(w_upleft)tile = 18; //top, right, left, up-right, up-left
+					} 
+					else if(w_upleft)tile = 32; //top, right, left, up-left
+				} 
+				else if(w_upright)tile = 22; //top, right, up-right
+			} 
+			else if(w_down) //top, down
+			{ 
+				tile = 25;
+				if(w_left) //top, down, left
+				{ 
+					tile = 46;
+					if(w_downleft) //top, down, left, down-left
+					{ 
+						tile = 31;
+						if(w_upleft)tile = 17; //top, down, left, down-left, up-left
+					} 
+					else if(w_upleft)tile = 38; //top, down, left, up-left
+				} 
+			} 
+			else if(w_left) //top, left
+			{ 
+				tile = 39;
+				if(w_upleft)tile = 21; //top, left, up-left
+			} 
+		} 
+		else if(w_right) //right
+		{ 
+			tile = 28;
+			if(w_down) //right, down
+			{ 
+				tile = 41;
+				if(w_left) //right, down, left
+				{ 
+					tile = 45;
+					if(w_downright) //right, down, left, down-right
+					{ 
+						tile = 34;
+						if(w_downleft) tile = 16; //right, down, left, down-right, down-left
+					} 
+					else if(w_downleft)tile = 37; //right, down, left, down-left
+				} 
+				else if(w_downright)tile = 23; //right, down, down-right
+			} 
+			else if(w_left) //right, left
+			{ 
+				tile = 24;
+			} 
+		} 
+		else if(w_down) //down
+		{ 
+			tile = 29;
+			if(w_left) //down, left
+			{ 
+				tile = 42;
+				if(w_downleft)tile = 20; //down, left, down-left
+			} 
+		} 
+		else if(w_left) //left
+		{ 
+			tile = 26;
+		} 
+
+		return tile; 
 	}
 
 }
