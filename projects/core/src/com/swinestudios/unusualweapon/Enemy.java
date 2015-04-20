@@ -11,14 +11,14 @@ public class Enemy {
 	public float velX, velY;
 	public float accelX, accelY;
 
-	public final float frictionX = 0.7f;
+	public final float frictionX = 0.5f;
 	public final float frictionY = 0.7f;
 
-	public final float moveSpeedX = 2.0f;
-	public final float moveSpeedY = 2.0f;
+	public final float moveSpeedX = 1.0f;
+	public final float moveSpeedY = 1.0f;
 
-	public final float maxSpeedX = 2.0f;
-	public final float maxSpeedY = 2.0f;
+	public final float maxSpeedX = 1.0f;
+	public final float maxSpeedY = 1.0f;
 
 	public boolean isActive;
 
@@ -35,6 +35,7 @@ public class Enemy {
 
 	public final float LEASH_DISTANCE = 100f;
 	public final float CHASING_ACCEL = 1f;
+	public final float BURST_SPEED = 3f;
 
 	public boolean chasing = false;//Whether or not it is actively trying to seek out the player.
 
@@ -44,7 +45,7 @@ public class Enemy {
 
 
 	//HEALTH AND HEALTHBAR STUFF
-	public float maxHealth = 100.0f;
+	/*public float maxHealth = 100.0f;
 	public float health = maxHealth;
 
 	public float healthBarMaxWidth = 200;
@@ -55,7 +56,7 @@ public class Enemy {
 
 	public float healthBarRed = 0;
 	public float healthBarGreen = 0;
-	public float healthBarBlue = 0;
+	public float healthBarBlue = 0;*/
 	//-----------------------------------
 
 	public boolean delete = false;
@@ -83,9 +84,8 @@ public class Enemy {
 
 	public void update(float delta){
 
-
-
-		//System.out.println(x + " "  + y);
+		accelX = 0;
+		accelY = 0;
 
 		pathing(delta);
 
@@ -176,18 +176,20 @@ public class Enemy {
 			default:
 
 				//Do nothing, this shouldn't happen.
-
+				break;
 			}
 		}
 
 	}
 
 	public void swimLeft(){
-		accelX = -1f;
+		//accelX = -1f;
+		velX = -BURST_SPEED;
 	}
 
 	public void swimRight(){
-		accelX = 1f;
+		//accelX = 1f;
+		velX = BURST_SPEED;
 	}
 
 	public boolean isColliding(Rectangle other, float x, float y){

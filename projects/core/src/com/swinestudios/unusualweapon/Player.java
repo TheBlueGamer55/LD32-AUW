@@ -41,6 +41,11 @@ public class Player implements InputProcessor{
 
 	public float healthBarMaxWidth = 200;
 	public float healthBarHeight = 16;
+	
+	public final float damage = 5f; //TODO adjust later
+	public float damageTimer = 0f;
+	public float maxDamageTimer = 1f;
+	public boolean isDamaged = false;
 
 	//Obsolete - public float healthBarX = 400;
 	public float healthBarY = 16;
@@ -118,8 +123,16 @@ public class Player implements InputProcessor{
 
 		healthBarColoring();
 
+		checkEnemyCollision();
+		if(isDamaged){
+			damageTimer += delta;
+			if(damageTimer >= maxDamageTimer){
+				damageTimer = 0;
+				isDamaged = false;
+			}
+		}
 	}
-	
+
 	public void healthBarColoring(){
 		if( getHealthPercentage() == 1.0f ){
 			healthBarRed = 1.0f;
@@ -132,8 +145,8 @@ public class Player implements InputProcessor{
 			healthBarBlue = 0;
 		}
 	}
-	
-	
+
+
 	public void shooting(float delta){//Handles shooting and reloading.
 		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && bubbleAmmo > 0){//On left-click, fire a bubble. The rate will need to be limited in the future.
 
@@ -168,6 +181,18 @@ public class Player implements InputProcessor{
 			accelY = moveSpeedY;
 		}
 	}
+
+	public void checkEnemyCollision(){
+		for(int i = 0; i<level.enemies.size(); i++){
+			if(isColliding(level.enemies.get(i).hitbox, x, y)){
+				if(!isDamaged){
+					damagePlayer(damage);
+					isDamaged = true;
+				}
+			}
+		}
+	}
+
 	/*
 	 * Checks if there is a collision if the player was at the given position.
 	 */
@@ -313,6 +338,10 @@ public class Player implements InputProcessor{
 
 	public float getHealthPercentage(){
 		return(health/maxHealth);
+	}
+	
+	public void damagePlayer(float amount){
+		this.health -= amount;
 	}
 
 	/*

@@ -86,8 +86,13 @@ public class CaveSystem{
 				}
 			}
 		}
-
-		//Initialize tile types
+		setTileTypes();
+	}
+	
+	/*
+	 * Initializes tile types
+	 */
+	public void setTileTypes(){
 		for(int i = 0; i < terrain.length; i++){
 			for(int j = 0; j < terrain[i].length; j++){
 				if(terrain[i][j] == 1){

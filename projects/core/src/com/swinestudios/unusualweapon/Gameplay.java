@@ -33,15 +33,16 @@ public class Gameplay implements GameScreen{
 
 	public Player player;
 	public boolean foundEmptySpace;
-
-	public Enemy testEnemy;
+	
+	public boolean gameOver = false;
 
 	public CaveSystem cave;
 	public Sprite caveTileset;
 	public TextureRegion[][] tiles;
-	public Sprite[][] caveTiles;
+	public static Sprite[][] caveTiles;
 	
 	public final int treasureChance = 20; //Percent chance of treasure spawning at each "platform"
+	public final int enemyChance = 10; //Percent chance of enemies spawning at each "ceiling"
 
 	@Override
 	public int getId(){
@@ -89,8 +90,6 @@ public class Gameplay implements GameScreen{
 		treasures = new ArrayList<Treasure>();
 
 		player = new Player(-150, -150, this);
-		testEnemy = new Enemy( 320, 240, 16, 16, this);
-		enemies.add(testEnemy);
 
 		camX = player.x - Gdx.graphics.getWidth() / 2;
 		camY = player.y - Gdx.graphics.getHeight() / 2;
@@ -105,6 +104,7 @@ public class Gameplay implements GameScreen{
 		player.y = (float)(cave.y + emptySpaces.get(spawnIndex).getY() * CaveSystem.tileSize);
 		
 		spawnTreasure();
+		spawnEnemies();
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -148,7 +148,9 @@ public class Gameplay implements GameScreen{
 		}
 
 		for(int i = 0; i<enemies.size(); i++){
-			enemies.get(i).update(delta);
+			if(enemies.get(i).distanceTo(player.hitbox) <= enemies.get(i).LEASH_DISTANCE * 4){ //Needed to prevent lag
+				enemies.get(i).update(delta);
+			}
 			if(enemies.get(i).delete == true){
 				enemies.remove(i);
 			}
@@ -204,7 +206,23 @@ public class Gameplay implements GameScreen{
 			for(int j = 0; j < cave.terrain[i].length; j++){
 				if(cave.terrain[i][j] == 1 && cave.terrain[i-1][j] == 0){ //a "platform"
 					if(Global_Constants.random.nextInt(100) <= treasureChance){
-						treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize, cave.y + i * CaveSystem.tileSize, this));
+						treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize + 3, cave.y + i * CaveSystem.tileSize, this));
+					}
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Spawns enemies in the cave.
+	 */
+	public void spawnEnemies(){
+		for(int i = 2; i < cave.terrain.length - 2; i++){
+			for(int j = 0; j < cave.terrain[i].length; j++){
+				if(cave.terrain[i][j] == 1 && cave.terrain[i+1][j] == 0){ //a "ceiling"
+					if(Global_Constants.random.nextInt(100) <= enemyChance){
+						//treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize + 3, cave.y + i * CaveSystem.tileSize, this));
+						enemies.add(new Enemy(cave.x + j * CaveSystem.tileSize + 3, cave.y + 4 + (i+1) * CaveSystem.tileSize, 16, 16, this));
 					}
 				}
 			}
