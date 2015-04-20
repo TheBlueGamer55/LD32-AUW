@@ -29,6 +29,7 @@ public class Gameplay implements GameScreen{
 	public ArrayList<Rectangle> solids;
 	public ArrayList<Bubble> bubbles;
 	public ArrayList<Enemy> enemies;
+	public ArrayList<Treasure> treasures;
 
 	public Player player;
 	public boolean foundEmptySpace;
@@ -39,6 +40,8 @@ public class Gameplay implements GameScreen{
 	public Sprite caveTileset;
 	public TextureRegion[][] tiles;
 	public Sprite[][] caveTiles;
+	
+	public final int treasureChance = 20; //Percent chance of treasure spawning at each "platform"
 
 	@Override
 	public int getId(){
@@ -83,6 +86,7 @@ public class Gameplay implements GameScreen{
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
 		enemies = new ArrayList<Enemy>();
+		treasures = new ArrayList<Treasure>();
 
 		player = new Player(-150, -150, this);
 		testEnemy = new Enemy( 320, 240, 16, 16, this);
@@ -99,6 +103,8 @@ public class Gameplay implements GameScreen{
 		int spawnIndex = Global_Constants.random.nextInt(emptySpaces.size());
 		player.x = (float)(cave.x + emptySpaces.get(spawnIndex).getX() * CaveSystem.tileSize);
 		player.y = (float)(cave.y + emptySpaces.get(spawnIndex).getY() * CaveSystem.tileSize);
+		
+		spawnTreasure();
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -117,6 +123,7 @@ public class Gameplay implements GameScreen{
 		renderCave(g);
 		//renderSolids(g);
 		player.render(g);
+		renderTreasures(g);
 
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).render( g );
@@ -146,6 +153,8 @@ public class Gameplay implements GameScreen{
 				enemies.remove(i);
 			}
 		}
+		
+		updateTreasures(delta);
 
 		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
 			sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
@@ -156,6 +165,18 @@ public class Gameplay implements GameScreen{
 	public void renderSolids(Graphics g){
 		for(int i = 0; i < solids.size(); i++){
 			solids.get(i).draw(g);
+		}
+	}
+	
+	public void renderTreasures(Graphics g){
+		for(int i = 0; i < treasures.size(); i++){
+			treasures.get(i).render(g);
+		}
+	}
+	
+	public void updateTreasures(float delta){
+		for(int i = 0; i < treasures.size(); i++){
+			treasures.get(i).update(delta);
 		}
 	}
 
@@ -170,6 +191,21 @@ public class Gameplay implements GameScreen{
 					int row = type / 8; //the width of the tileset in tiles is 8
 					int col = type % 8;
 					g.drawSprite(caveTiles[row][col], cave.x + j * CaveSystem.tileSize, cave.y + i * CaveSystem.tileSize);
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Spawns treasure in the cave.
+	 */
+	public void spawnTreasure(){
+		for(int i = 2; i < cave.terrain.length; i++){
+			for(int j = 0; j < cave.terrain[i].length; j++){
+				if(cave.terrain[i][j] == 1 && cave.terrain[i-1][j] == 0){ //a "platform"
+					if(Global_Constants.random.nextInt(100) <= treasureChance){
+						treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize, cave.y + i * CaveSystem.tileSize, this));
+					}
 				}
 			}
 		}

@@ -30,7 +30,7 @@ public class CaveSystem{
 		this.x = x;
 		this.y = y;
 		this.level = level;
-		terrain = new int[200][100]; //TODO temporary size
+		terrain = new int[100][100]; //TODO temporary size
 		tileTypes = new int[terrain.length][terrain[0].length];
 		miners = new ArrayList<Miner>();
 		miner1 = new Miner(terrain[0].length / 2, terrain.length / 2);
@@ -57,7 +57,19 @@ public class CaveSystem{
 			}
 			int spawner = random.nextInt(100) + 1;
 			if(spawner <= spawnChance){
-				miners.add(new Miner(random.nextInt(terrain[0].length), random.nextInt(terrain.length)));
+				//Connected generation
+				/*ArrayList<Point> temp = findEmptySpace();
+				int tempChoice;
+				if(temp.size() > 0){
+					tempChoice = random.nextInt(temp.size());
+					miners.add(new Miner((int)temp.get(tempChoice).getX(), (int)temp.get(tempChoice).getY()));
+				}
+				else{
+					miners.add(new Miner(terrain[0].length / 2, terrain.length / 2));
+				}*/
+
+				//Disconnected generation
+				miners.add(new Miner(random.nextInt(terrain[0].length), random.nextInt(terrain.length))); 
 			}
 		}
 		miners.clear();
@@ -74,7 +86,7 @@ public class CaveSystem{
 				}
 			}
 		}
-		
+
 		//Initialize tile types
 		for(int i = 0; i < terrain.length; i++){
 			for(int j = 0; j < terrain[i].length; j++){
@@ -195,6 +207,25 @@ public class CaveSystem{
 			random = new Random();
 			choice = random.nextInt(4) + 1;
 		}
+		
+		/*
+		 * Returns the distance between this miner and the given miner.
+		 */
+		public float distanceTo(Miner target){
+			return ((float)Math.pow(Math.pow((target.y - this.y), 2.0) + Math.pow((target.x - this.x), 2.0), 0.5));
+		}
+		
+		public Miner findClosestMiner(){
+			Miner temp = this;
+			float maxDist = 0;
+			for(int i = 0; i < miners.size(); i++){
+				if(distanceTo(miners.get(i)) > maxDist){
+					maxDist = distanceTo(miners.get(i));
+					temp = miners.get(i);
+				}
+			}
+			return temp;
+		}
 
 		public void moveMiner(){
 			if(choice == 1){ //north
@@ -215,6 +246,34 @@ public class CaveSystem{
 			y = Math.abs(y % terrain.length);
 
 			choice = random.nextInt(4) + 1;
+
+			/*
+			//Pull miners together TODO not sure if needed
+			//Miner other = miners.get(random.nextInt(miners.size()));
+			Miner other = findClosestMiner();
+			if(other != this){
+				if(other.x > this.x){ //if another miner is to the right
+					if(other.y > this.y){ //if another miner is below
+						boolean temp = random.nextBoolean();
+						choice = temp ? 1 : 4; //move north or west
+					}
+					else if(other.y <= this.y){ //if another miner is above
+						boolean temp = random.nextBoolean();
+						choice = temp ? 3 : 4; //move west or south
+					}
+				}
+				else if(other.x <= this.x){ //if another miner is to the left
+					if(other.y > this.y){ //if another miner is below
+						boolean temp = random.nextBoolean();
+						choice = temp ? 1 : 2; //move north or east
+					}
+					else if(other.y <= this.y){ //if another miner is above
+						boolean temp = random.nextBoolean();
+						choice = temp ? 2 : 3; //move east or south
+					}
+				}
+				choice = (choice + 2) % 4;
+			}*/
 
 			//"Mine" the solid
 			if(terrain[y][x] == 1){
@@ -260,7 +319,7 @@ public class CaveSystem{
 		boolean w_left, w_right, w_up, w_down, w_upleft, w_downleft, w_upright, w_downright;
 
 		int iw = 1; 
-		
+
 		if(x - iw < 0 && y - iw < 0){ //top-left corner
 			w_left = true; w_upleft = true; w_downleft = true; w_up = true; w_upright = true;
 			w_right = terrain[y][x+iw] == 1; 
@@ -285,7 +344,7 @@ public class CaveSystem{
 			w_upleft = terrain[y-iw][x-iw] == 1; 
 			w_left = terrain[y][x-iw] == 1;
 		}
-		
+
 		else if (x-iw < 0) { //left edge
 			w_left = true; w_upleft = true; w_downleft = true;
 			w_up = terrain[y-iw][x] == 1;
