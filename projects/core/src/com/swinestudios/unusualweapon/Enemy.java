@@ -1,9 +1,13 @@
 package com.swinestudios.unusualweapon;
 
 import org.mini2Dx.core.geom.Rectangle;
+import org.mini2Dx.core.graphics.Animation;
 import org.mini2Dx.core.graphics.Graphics;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Enemy {
 
@@ -67,7 +71,10 @@ public class Enemy {
 	public Gameplay level;
 	public String type;
 
-
+	public Sprite left1, left2, right1, right2;
+	public Animation<Sprite> fishLeft, fishRight, fishCurrent;
+	//TODO adjust later
+	public float animationSpeed = 0.1f; //How many seconds a frame lasts
 
 	public Enemy(float x, float y, float width, float height, Gameplay level){
 		this.x = x;
@@ -80,9 +87,37 @@ public class Enemy {
 		isActive = false;
 		this.level = level;
 		type = "Enemy";
+		facingRight = true;
+		facingLeft = false;
+		
+		right1 = new Sprite(new Texture(Gdx.files.internal("fishFrames/fish_right_1.png")));
+		right2 = new Sprite(new Texture(Gdx.files.internal("fishFrames/fish_right_2.png")));
+		
+		left1 = new Sprite(new Texture(Gdx.files.internal("fishFrames/fish_left_1.png")));
+		left2 = new Sprite(new Texture(Gdx.files.internal("fishFrames/fish_left_2.png")));
+		
+		Global_Constants.adjustSprite(right1, right2, left1, left2);
+		
+		fishLeft = new Animation<Sprite>(); //left animation
+		fishRight = new Animation<Sprite>(); //right animation
+		
+		fishLeft.addFrame(left1, animationSpeed);
+		fishLeft.addFrame(left2, animationSpeed);
+		fishLeft.setLooping(true);
+		fishLeft.flip(false, true);
+		
+		fishRight.addFrame(right1, animationSpeed);
+		fishRight.addFrame(right2, animationSpeed);
+		fishRight.setLooping(true);
+		fishRight.flip(false, true);
+		
+		Global_Constants.setFrameSizes(fishLeft, left1.getWidth() * 2, left1.getHeight() * 2);
+		Global_Constants.setFrameSizes(fishRight, right1.getWidth() * 2, right1.getHeight() * 2);
+		
+		fishCurrent = fishRight;
+		
+		hitbox = new Rectangle(x, y, right1.getWidth(), right1.getHeight());
 	}
-
-
 
 	public void update(float delta){
 
@@ -100,6 +135,8 @@ public class Enemy {
 		move();
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
+		
+		updateSprite(delta);
 
 		if(bubbled){
 			bubbleTimer += delta;
@@ -110,15 +147,27 @@ public class Enemy {
 		}
 	}
 
-
-
 	public void render(Graphics g){
-
-
-
-		g.setColor(Color.RED);
-		g.fillRect(x, y, this.hitbox.width, this.hitbox.height);
-		g.setColor(Color.WHITE);
+		fishCurrent.draw(g, x, y);
+	}
+	
+	public void updateSprite(float delta){
+		if(velX >= 0){
+			facingRight = true;
+			facingLeft = false;
+		}
+		else{
+			facingRight = false;
+			facingLeft = true;
+		}
+		//change the direction the fish is facing
+		if(facingRight){
+			fishCurrent = fishRight;
+		}
+		else{
+			fishCurrent = fishLeft;
+		}
+		fishCurrent.update(delta);
 	}
 	
 	public void bubbleEffect(){

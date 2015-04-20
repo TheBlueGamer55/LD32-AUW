@@ -2,6 +2,10 @@ package com.swinestudios.unusualweapon;
 
 import java.util.Random;
 
+import org.mini2Dx.core.graphics.Animation;
+
+import com.badlogic.gdx.graphics.g2d.Sprite;
+
 public class Global_Constants {
 
 		public static float gravity = 1.0f;//purely placeholder values for now
@@ -30,6 +34,25 @@ public class Global_Constants {
 			
 			
 			return (float) ( y / c);
+		}
+		
+		/*
+		 * Flips images to their right orientation
+		 */
+		public static void adjustSprite(Sprite... s){
+			for(int i = 0; i < s.length; i++){
+				s[i].setOrigin(0, 0);
+				s[i].flip(false, true);
+			}
+		}
+		
+		/*
+		 * Changes the size of all given frames
+		 */
+		public static void setFrameSizes(Animation<Sprite> a, float width, float height){
+			for(int i = 0; i < a.getNumberOfFrames(); i++){
+				a.getFrame(i).setSize(width, height);
+			}
 		}
 		
 		public static Random random = new Random();

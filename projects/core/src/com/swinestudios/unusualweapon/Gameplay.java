@@ -225,7 +225,10 @@ public class Gameplay implements GameScreen{
 	public void spawnEnemies(){
 		for(int i = 2; i < cave.terrain.length - 2; i++){
 			for(int j = 0; j < cave.terrain[i].length; j++){
-				if(cave.terrain[i][j] == 1 && cave.terrain[i+1][j] == 0){ //a "ceiling"
+				if( cave.terrain[i][j] == 1 && 
+					cave.terrain[i+1][j] == 0 &&
+					cave.terrain[i+1][j-1] == 0 &&
+					cave.terrain[i+1][j+1] == 0){ //a 3-block-wide "ceiling"
 					if(Global_Constants.random.nextInt(100) <= enemyChance){
 						//treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize + 3, cave.y + i * CaveSystem.tileSize, this));
 						enemies.add(new Enemy(cave.x + j * CaveSystem.tileSize + 3, cave.y + 4 + (i+1) * CaveSystem.tileSize, 16, 16, this));
