@@ -1,6 +1,7 @@
 package com.swinestudios.unusualweapon;
 
 import org.mini2Dx.core.geom.Rectangle;
+import org.mini2Dx.core.graphics.Animation;
 import org.mini2Dx.core.graphics.Graphics;
 
 import com.badlogic.gdx.Gdx;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Player implements InputProcessor{ 
@@ -62,6 +64,10 @@ public class Player implements InputProcessor{
 	
 	public Sound bubbleFire;
 	public Sound pickupTreasure;
+	
+	public Sprite left, left1, left2, right, right1, right2;
+	public Animation<Sprite> playerLeft, playerRight, playerCurrent;
+	public final float animationSpeed = 0.2f; //the # of seconds each frame lasts
 
 	//Controls/key bindings
 	public final int LEFT = Keys.LEFT;
@@ -72,7 +78,6 @@ public class Player implements InputProcessor{
 	public Player(float x, float y, Gameplay level){
 		this.x = x;
 		this.y = y;
-		hitbox = new Rectangle(x, y, 32, 32); 
 		velX = 0;
 		velY = 0;
 		accelX = 0;
@@ -82,12 +87,57 @@ public class Player implements InputProcessor{
 		type = "Player";
 		bubbleFire = Gdx.audio.newSound(Gdx.files.internal("bubbleHit.wav"));
 		pickupTreasure = Gdx.audio.newSound(Gdx.files.internal("pickupTreasure.wav"));
+		
+		//Initialize art
+		facingRight = true;
+		facingLeft = false;
+		
+		right = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_right.png")));
+		right1 = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_right_1.png")));
+		right2 = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_right_2.png")));
+		
+		left = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_left.png")));
+		left1 = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_left_1.png")));
+		left2 = new Sprite(new Texture(Gdx.files.internal("playerFrames/diver_left_2.png")));
+		
+		adjustSprite(right, right1, right2, left, left1, left2);
+		
+		playerLeft = new Animation<Sprite>(); //left animation
+		playerRight = new Animation<Sprite>(); //right animation
+		
+		playerLeft.addFrame(left, 0);
+		playerLeft.addFrame(left1, animationSpeed);
+		playerLeft.addFrame(left2, animationSpeed);
+		playerLeft.setLooping(false);
+		playerLeft.flip(false, true);
+		
+		playerRight.addFrame(right, 0);
+		playerRight.addFrame(right1, animationSpeed);
+		playerRight.addFrame(right2, animationSpeed);
+		playerRight.setLooping(false);
+		playerRight.flip(false, true);
+		
+		playerCurrent = playerRight;
+		
+		hitbox = new Rectangle(x, y, right.getWidth(), right.getHeight()); 
 	}
 
 	public void render(Graphics g){
 		g.setColor(Color.GREEN);
 		if(bubbleAmmo == 0){
 			g.setColor(Color.RED);
+		}
+		
+		if(velX != 0 || velY != 0){ //if moving, draw animated sprites
+			playerCurrent.draw(g, x, y);
+		}
+		else{ //draw still images if not moving, with appropriate direction
+			if(facingRight){
+				g.drawSprite(right, x, y);
+			}
+			else{
+				g.drawSprite(left, x, y);
+			}
 		}
 
 		//these two lines are the ammo/reload indicators.
@@ -99,10 +149,6 @@ public class Player implements InputProcessor{
 
 		g.setColor(new Color(healthBarRed, healthBarGreen, healthBarBlue, 1.0f));
 		g.fillRect(Gdx.graphics.getWidth() - (healthBarMaxWidth + 16) + level.camX, healthBarY + level.camY, Global_Constants.minZero(healthBarMaxWidth * getHealthPercentage()), healthBarHeight);
-
-
-		g.setColor(Color.WHITE);
-		g.drawRect(x, y, 32, 32);
 	}
 
 	public void update(float delta){
@@ -125,6 +171,8 @@ public class Player implements InputProcessor{
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
 
+		updateSprite(delta);
+		
 		shooting(delta);
 
 		healthBarColoring();
@@ -137,6 +185,26 @@ public class Player implements InputProcessor{
 				isDamaged = false;
 			}
 		}
+	}
+	
+	public void updateSprite(float delta){
+		//change the direction the player is facing
+		if(facingRight){
+			playerCurrent = playerRight;
+		}
+		else{
+			playerCurrent = playerLeft;
+		}
+		//check if the player is moving or not to set up static or animated frames
+		if(velX != 0 || velY != 0){
+			playerLeft.setLooping(true);
+			playerRight.setLooping(true);
+		}
+		else{
+			playerLeft.setLooping(false);
+			playerRight.setLooping(false);
+		}
+		playerCurrent.update(delta);
 	}
 
 	public void healthBarColoring(){
@@ -175,10 +243,14 @@ public class Player implements InputProcessor{
 		//Move Left
 		if(Gdx.input.isKeyPressed(this.LEFT) && velX > -maxSpeedX){
 			accelX = -moveSpeedX;
+			facingRight = false;
+			facingLeft = true;
 		}
 		//Move Right
 		if(Gdx.input.isKeyPressed(this.RIGHT) && velX < maxSpeedX){
 			accelX = moveSpeedX;
+			facingRight = true;
+			facingLeft = false;
 		}
 		//Move Up
 		if(Gdx.input.isKeyPressed(this.UP) && velY > -maxSpeedY){
@@ -360,6 +432,21 @@ public class Player implements InputProcessor{
 		for(int i = 0; i < s.length; i++){
 			s[i].setOrigin(0, 0);
 			s[i].flip(false, true);
+		}
+	}
+	
+	/*
+	 * Used on animations to flip the sprites correctly
+	 */
+	public void flipFrames(Animation<Sprite> a){
+		for(int i = 0; i < a.getNumberOfFrames(); i++){
+			a.getFrame(i).flip(false, true);
+		}
+	}
+
+	public void setFrameOrigins(Animation<Sprite> a){
+		for(int i = 0; i < a.getNumberOfFrames(); i++){
+			a.getFrame(i).setOrigin(0, 0);
 		}
 	}
 
