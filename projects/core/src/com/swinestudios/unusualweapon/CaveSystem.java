@@ -96,6 +96,45 @@ public class CaveSystem{
 			}
 		}
 	}
+	
+	/*
+	 * TODO Generates terrain using cellular automata
+	 */
+	public void generateTerrain2(){
+		//Fill terrain with 45% probability
+		for(int i = 0; i < terrain.length; i++){
+			for(int j = 0; j < terrain[i].length; j++){
+				if(random.nextInt(100) <= 45){
+					terrain[i][j] = 1;
+				}
+			}
+		}
+		for(int n = 0; n < 4; n++){
+			for(int i = 0; i < terrain.length; i++){
+				for(int j = 0; j < terrain[i].length; j++){
+					System.out.println(getNeighborCount(j, i, 1));
+					if(getNeighborCount(j, i, 1) >= 4 || getNeighborCount(j, i, 2) <= 2){
+						terrain[i][j] = 1;
+					}
+					else{
+						terrain[i][j] = 0;
+					}
+				}
+			}
+		}
+		for(int n = 0; n < 3; n++){
+			for(int i = 0; i < terrain.length; i++){
+				for(int j = 0; j < terrain[i].length; j++){
+					if(getNeighborCount(j, i, 1) >= 4){
+						terrain[i][j] = 1;
+					}
+					else{
+						terrain[i][j] = 0;
+					}
+				}
+			}
+		}
+	}
 
 	/*
 	 * Adds the generated terrain to the level.
@@ -164,6 +203,21 @@ public class CaveSystem{
 					terrain[y][x] = 0;
 				}
 			}
+		}
+	}
+	
+	/*
+	 * Returns the number of solids within n steps
+	 */
+	public int getNeighborCount(int row, int col, int n){
+		if(n <= 0){
+			return 0;
+		}
+		if(row == 0 || col == 0 || row == terrain.length - 1 || col == terrain[0].length - 1){
+			return 1;
+		}
+		else{
+			return terrain[row][col] + getNeighborCount(row+1, col, n--) + getNeighborCount(row-1, col, n--) + getNeighborCount(row, col+1, n--) + getNeighborCount(row, col-1, n--);
 		}
 	}
 
