@@ -41,7 +41,8 @@ public class Treasure {
 
 	public void checkPlayerCollision(){
 		if(hitbox.intersects(level.player.hitbox)){
-			level.treasures.remove(this); //TODO add points
+			level.player.pickupTreasure.play();
+			level.treasures.remove(this); 
 		}
 	}
 

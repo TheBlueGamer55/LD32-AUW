@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
@@ -58,6 +59,9 @@ public class Player implements InputProcessor{
 	public Rectangle hitbox;
 	public Gameplay level;
 	public String type;
+	
+	public Sound bubbleFire;
+	public Sound pickupTreasure;
 
 	//Controls/key bindings
 	public final int LEFT = Keys.LEFT;
@@ -76,6 +80,8 @@ public class Player implements InputProcessor{
 		isActive = false;
 		this.level = level;
 		type = "Player";
+		bubbleFire = Gdx.audio.newSound(Gdx.files.internal("bubbleHit.wav"));
+		pickupTreasure = Gdx.audio.newSound(Gdx.files.internal("pickupTreasure.wav"));
 	}
 
 	public void render(Graphics g){
@@ -149,7 +155,9 @@ public class Player implements InputProcessor{
 
 	public void shooting(float delta){//Handles shooting and reloading.
 		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && bubbleAmmo > 0){//On left-click, fire a bubble. The rate will need to be limited in the future.
-
+			if(bubbleAmmo == totalBubbleAmmo){
+				bubbleFire.play();
+			}
 			level.bubbles.add(new Bubble(this.x+16, this.y+16, Gdx.input.getX() + level.camX, Gdx.input.getY() + level.camY, this.level));
 			bubbleAmmo--;
 		}

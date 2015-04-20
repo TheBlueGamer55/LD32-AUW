@@ -40,6 +40,8 @@ public class Enemy {
 	public boolean chasing = false;//Whether or not it is actively trying to seek out the player.
 
 	public boolean bubbled = false;
+	public float bubbleTimer = 0f;
+	public float maxBubbleTimer = 4f; //How many seconds an enemy stays bubbled
 
 	//-------------------------------
 
@@ -99,6 +101,13 @@ public class Enemy {
 		hitbox.setX(this.x);
 		hitbox.setY(this.y);
 
+		if(bubbled){
+			bubbleTimer += delta;
+			if(bubbleTimer > maxBubbleTimer){
+				bubbleTimer = 0;
+				bubbled = false;
+			}
+		}
 	}
 
 

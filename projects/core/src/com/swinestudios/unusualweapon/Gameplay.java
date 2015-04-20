@@ -15,6 +15,7 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -41,6 +42,8 @@ public class Gameplay implements GameScreen{
 	public TextureRegion[][] tiles;
 	public static Sprite[][] caveTiles;
 	
+	public Sound pop;
+	
 	public final int treasureChance = 20; //Percent chance of treasure spawning at each "platform"
 	public final int enemyChance = 10; //Percent chance of enemies spawning at each "ceiling"
 
@@ -63,6 +66,7 @@ public class Gameplay implements GameScreen{
 				caveTiles[i][j].setSize(CaveSystem.tileSize, CaveSystem.tileSize);
 			}
 		}
+		pop = Gdx.audio.newSound(Gdx.files.internal("pop2.wav"));
 		//caveTileset.setSize(caveTileset.getWidth() * (CaveSystem.tileSize / 16), caveTileset.getHeight() * (CaveSystem.tileSize / 16));
 	}
 
@@ -143,6 +147,8 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i<bubbles.size(); i++){
 			bubbles.get(i).update(delta);
 			if(bubbles.get(i).delete == true){
+				pop.play();
+				
 				bubbles.remove(i);
 			}
 		}

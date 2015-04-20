@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Bubble {
 	
-	public final float NET_VELOCITY = 1.5f;
+	public final float NET_VELOCITY = 1.0f;
 	
 	public float framesAtZero = 0;
 	
@@ -34,7 +34,6 @@ public class Bubble {
 
 	public boolean isActive;
 	public boolean delete = false;
-
 
 	public Rectangle hitbox;
 	public Gameplay level;
