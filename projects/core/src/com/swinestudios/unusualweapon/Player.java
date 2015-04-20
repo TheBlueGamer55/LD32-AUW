@@ -120,6 +120,30 @@ public class Player implements InputProcessor{
 
 	}
 	
+	public void enemyInteractions(){
+		
+		for(int i = 0; i<level.enemies.size(); i++){
+			if(colliding(level.enemies.get(i).hitbox) && level.enemies.get(i).bubbled == false){
+				
+				health -= 10f;
+				
+				//TODO screenshake
+				
+			}
+		}
+		
+	}
+	
+	public boolean colliding(Rectangle input){
+		if(this.hitbox.intersects(input)){
+			return true;
+		}
+
+		else{
+			return false;
+		}
+	}
+	
 	public void healthBarColoring(){
 		if( getHealthPercentage() == 1.0f ){
 			healthBarRed = 1.0f;
