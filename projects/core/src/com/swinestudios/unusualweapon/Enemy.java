@@ -20,8 +20,8 @@ public class Enemy {
 	public final float moveSpeedX = 1.0f;
 	public final float moveSpeedY = 1.0f;
 
-	public final float maxSpeedX = 1.0f;
-	public final float maxSpeedY = 1.0f;
+	public final float maxSpeedX = 1.2f;
+	public final float maxSpeedY = 1.2f;
 
 	public boolean isActive;
 
