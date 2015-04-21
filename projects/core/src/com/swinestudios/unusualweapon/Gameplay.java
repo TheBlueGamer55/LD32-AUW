@@ -16,6 +16,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -34,16 +35,17 @@ public class Gameplay implements GameScreen{
 
 	public Player player;
 	public boolean foundEmptySpace;
-	
+
 	public boolean gameOver = false;
+	public boolean paused = false;
 
 	public CaveSystem cave;
 	public Sprite caveTileset;
 	public TextureRegion[][] tiles;
 	public static Sprite[][] caveTiles;
-	
+
 	public Sound pop;
-	
+
 	public final int treasureChance = 20; //Percent chance of treasure spawning at each "platform"
 	public final int enemyChance = 10; //Percent chance of enemies spawning at each "ceiling"
 
@@ -81,13 +83,14 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void postTransitionOut(Transition t){
-
+		gameOver = false;
+		paused = false;
 	}
 
 	@Override
 	public void preTransitionIn(Transition t){
 		foundEmptySpace = false;
-		
+
 		solids = new ArrayList<Rectangle>();
 		bubbles = new ArrayList<Bubble>();
 		enemies = new ArrayList<Enemy>();
@@ -106,7 +109,7 @@ public class Gameplay implements GameScreen{
 		int spawnIndex = Global_Constants.random.nextInt(emptySpaces.size());
 		player.x = (float)(cave.x + emptySpaces.get(spawnIndex).getX() * CaveSystem.tileSize);
 		player.y = (float)(cave.y + emptySpaces.get(spawnIndex).getY() * CaveSystem.tileSize);
-		
+
 		spawnTreasure();
 		spawnEnemies();
 
@@ -118,7 +121,7 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void preTransitionOut(Transition t){
-
+		
 	}
 
 	@Override
@@ -136,36 +139,66 @@ public class Gameplay implements GameScreen{
 		for(int i = 0; i<enemies.size(); i++){
 			enemies.get(i).render( g );
 		}
+
+		if(gameOver){
+			g.setColor(Color.WHITE);
+			g.drawString("You died! Press Escape to go back to the main menu", camX + 160, camY + 240);
+		}
+		if(paused){
+			g.setColor(Color.WHITE);
+			g.drawString("Are you sure you want to quit? Y or N", camX + 220, camY + 240);
+		}
 	}
 
 	@Override
 	public void update(GameContainer gc, ScreenManager<? extends GameScreen> sm, float delta){
-		camX = player.x - Gdx.graphics.getWidth() / 2;
-		camY = player.y - Gdx.graphics.getHeight() / 2;
-		player.update(delta);	
+		if(!gameOver && !paused){
+			camX = player.x - Gdx.graphics.getWidth() / 2;
+			camY = player.y - Gdx.graphics.getHeight() / 2;
+			player.update(delta);	
 
-		for(int i = 0; i<bubbles.size(); i++){
-			bubbles.get(i).update(delta);
-			if(bubbles.get(i).delete == true){
-				pop.play();
-				
-				bubbles.remove(i);
+			for(int i = 0; i<bubbles.size(); i++){
+				bubbles.get(i).update(delta);
+				if(bubbles.get(i).delete == true){
+					pop.play();
+
+					bubbles.remove(i);
+				}
+			}
+
+			for(int i = 0; i<enemies.size(); i++){
+				if(enemies.get(i).distanceTo(player.hitbox) <= enemies.get(i).LEASH_DISTANCE * 4){ //Needed to prevent lag
+					enemies.get(i).update(delta);
+				}
+				if(enemies.get(i).delete == true){
+					enemies.remove(i);
+				}
+			}
+
+			updateTreasures(delta);
+
+			if(player.health <= 0){
+				gameOver = true;
+			}
+			
+			if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+				paused = true;
 			}
 		}
-
-		for(int i = 0; i<enemies.size(); i++){
-			if(enemies.get(i).distanceTo(player.hitbox) <= enemies.get(i).LEASH_DISTANCE * 4){ //Needed to prevent lag
-				enemies.get(i).update(delta);
+		else{
+			if(gameOver){
+				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
+				}
 			}
-			if(enemies.get(i).delete == true){
-				enemies.remove(i);
+			else if(paused){
+				if(Gdx.input.isKeyJustPressed(Keys.Y)){
+					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
+				}
+				if(Gdx.input.isKeyJustPressed(Keys.N)){
+					paused = false;
+				}
 			}
-		}
-		
-		updateTreasures(delta);
-
-		if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
-			sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
 		}
 	}
 
@@ -175,13 +208,13 @@ public class Gameplay implements GameScreen{
 			solids.get(i).draw(g);
 		}
 	}
-	
+
 	public void renderTreasures(Graphics g){
 		for(int i = 0; i < treasures.size(); i++){
 			treasures.get(i).render(g);
 		}
 	}
-	
+
 	public void updateTreasures(float delta){
 		for(int i = 0; i < treasures.size(); i++){
 			treasures.get(i).update(delta);
@@ -203,7 +236,7 @@ public class Gameplay implements GameScreen{
 			}
 		}
 	}
-	
+
 	/*
 	 * Spawns treasure in the cave.
 	 */
@@ -218,7 +251,7 @@ public class Gameplay implements GameScreen{
 			}
 		}
 	}
-	
+
 	/*
 	 * Spawns enemies in the cave.
 	 */
@@ -226,9 +259,9 @@ public class Gameplay implements GameScreen{
 		for(int i = 2; i < cave.terrain.length - 2; i++){
 			for(int j = 0; j < cave.terrain[i].length; j++){
 				if( cave.terrain[i][j] == 1 && 
-					cave.terrain[i+1][j] == 0 &&
-					cave.terrain[i+1][j-1] == 0 &&
-					cave.terrain[i+1][j+1] == 0){ //a 3-block-wide "ceiling"
+						cave.terrain[i+1][j] == 0 &&
+						cave.terrain[i+1][j-1] == 0 &&
+						cave.terrain[i+1][j+1] == 0){ //a 3-block-wide "ceiling"
 					if(Global_Constants.random.nextInt(100) <= enemyChance){
 						//treasures.add(new Treasure(cave.x + j * CaveSystem.tileSize + 3, cave.y + i * CaveSystem.tileSize, this));
 						enemies.add(new Enemy(cave.x + j * CaveSystem.tileSize + 3, cave.y + 4 + (i+1) * CaveSystem.tileSize, 16, 16, this));
