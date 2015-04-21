@@ -27,6 +27,7 @@ public class Gameplay implements GameScreen{
 	
 	public static int maxLevelCount = 0;
 	public static int levelCount = 0;
+	public static float CONSTANT_HEALTH = 100.0f;
 	public int originalTreasureCount;
 	public final int winPercent = 90; //TODO adjust later
 	
@@ -122,6 +123,8 @@ public class Gameplay implements GameScreen{
 		spawnTreasure();
 		spawnEnemies();
 		originalTreasureCount = treasures.size();
+		
+		player.health = CONSTANT_HEALTH;
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -207,6 +210,7 @@ public class Gameplay implements GameScreen{
 			if(gameOver){
 				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
 					Gameplay.levelCount = 0;
+					CONSTANT_HEALTH = 100f;
 					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
 				}
 			}

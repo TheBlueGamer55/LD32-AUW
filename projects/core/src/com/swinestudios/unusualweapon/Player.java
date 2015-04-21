@@ -64,6 +64,7 @@ public class Player implements InputProcessor{
 	
 	public Sound bubbleFire;
 	public Sound pickupTreasure;
+	public Sound hit;
 	
 	public Sprite left, left1, left2, right, right1, right2;
 	public Animation<Sprite> playerLeft, playerRight, playerCurrent;
@@ -87,6 +88,7 @@ public class Player implements InputProcessor{
 		type = "Player";
 		bubbleFire = Gdx.audio.newSound(Gdx.files.internal("bubbleHit.wav"));
 		pickupTreasure = Gdx.audio.newSound(Gdx.files.internal("pickupTreasure.wav"));
+		hit = Gdx.audio.newSound(Gdx.files.internal("hit.wav"));
 		
 		//Initialize art
 		facingRight = true;
@@ -422,6 +424,8 @@ public class Player implements InputProcessor{
 	
 	public void damagePlayer(float amount){
 		this.health -= amount;
+		Gameplay.CONSTANT_HEALTH -= amount;
+		hit.play();
 	}
 
 	/*

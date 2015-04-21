@@ -11,10 +11,20 @@ import org.mini2Dx.core.screen.transition.FadeOutTransition;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class MainMenu implements GameScreen{
 	
 	public static int ID = 1;
+	
+	public static final String FONT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789][_!$%#@|\\/?-+=()*&.;:,{}\"´`'<>";
+	
+	public BitmapFont font;
+	
+	public Sprite textBackground;
 	
 	public CaveSystem border;
 	public int[][] menuTerrain = new int[Gdx.graphics.getHeight() / CaveSystem.tileSize][Gdx.graphics.getWidth() / CaveSystem.tileSize];
@@ -26,11 +36,18 @@ public class MainMenu implements GameScreen{
 
 	@Override
 	public void initialise(GameContainer gc){
+		textBackground = new Sprite(new Texture(Gdx.files.internal("mainMenuTextBG.png")));
+		Global_Constants.adjustSprite(textBackground);
+		
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Pixel-UniCode.ttf"));
+		font = generator.generateFont(24, MainMenu.FONT_CHARACTERS, true);
+		generator.dispose();
+		
 		border = new CaveSystem(0, 0, null);
 		border.terrain = menuTerrain;
 		for(int i = 0; i < border.terrain.length; i++){
 			for(int j = 0; j < border.terrain[i].length; j++){
-				if(i == 0 || j == 0 || i == border.terrain.length - 1 || j == border.terrain[i].length - 1){
+				if(i == 0 || j == 0 || i == border.terrain.length - 1 || j == border.terrain[i].length - 1 || i == border.terrain.length - 4){
 					border.terrain[i][j] = 1;
 				}
 			}
@@ -64,11 +81,12 @@ public class MainMenu implements GameScreen{
 
 	@Override
 	public void render(GameContainer gc, Graphics g){
+		g.setFont(font);
 		renderCave(g);
-		g.drawString("To be named later", 320, 240);
 		g.setBackgroundColor(new Color(26 / 255f, 168 / 255f, 196 / 255f, 0));
-		g.drawString("Max levels completed in one run: " + Gameplay.maxLevelCount, 36, 36);
-		g.drawString("Current run: " + Gameplay.levelCount, 36, 50);
+		g.drawSprite(textBackground, 0, 0);
+		g.drawString("Max levels completed in one run: " + Gameplay.maxLevelCount, 198, 402);
+		g.drawString("Current run: " + Gameplay.levelCount, 198, 416);
 	}
 
 	@Override
