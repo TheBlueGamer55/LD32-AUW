@@ -25,8 +25,8 @@ public class Player implements InputProcessor{
 	public final float moveSpeedX = 2.0f;
 	public final float moveSpeedY = 2.0f;
 
-	public final float maxSpeedX = 2.0f;
-	public final float maxSpeedY = 2.0f;
+	public final float maxSpeedX = 1.7f;
+	public final float maxSpeedY = 1.7f;
 
 	public boolean isActive;
 
@@ -45,7 +45,7 @@ public class Player implements InputProcessor{
 	public float healthBarMaxWidth = 200;
 	public float healthBarHeight = 16;
 	
-	public final float damage = 15f; //TODO adjust later
+	public final float damage = 15f; 
 	public float damageTimer = 0f;
 	public float maxDamageTimer = 1f;
 	public boolean isDamaged = false;

@@ -25,11 +25,13 @@ public class Gameplay implements GameScreen{
 
 	public static int ID = 2;
 	
+	public static Sound theme;
+	
 	public static int maxLevelCount = 0;
 	public static int levelCount = 0;
 	public static float CONSTANT_HEALTH = 100.0f;
 	public int originalTreasureCount;
-	public final int winPercent = 90; //TODO adjust later
+	public final int winPercent = 77; //TODO adjust later
 	
 	public int treasureCount = 0;
 
@@ -64,6 +66,7 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void initialise(GameContainer gc){
+		theme = Gdx.audio.newSound(Gdx.files.internal("endawawa.ogg"));
 		caveTileset = new Sprite(new Texture(Gdx.files.internal("underwaterCaveTileset.png")));
 		caveTileset.setOrigin(0, 0);
 		tiles = caveTileset.split(16, 16);
@@ -86,13 +89,14 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void postTransitionIn(Transition t){
-
+		theme.loop();
 	}
 
 	@Override
 	public void postTransitionOut(Transition t){
 		gameOver = false;
 		paused = false;
+		theme.stop();
 	}
 
 	@Override
@@ -194,6 +198,7 @@ public class Gameplay implements GameScreen{
 				gameOver = true;
 			}
 			
+			System.out.println((float)treasures.size() / originalTreasureCount * 100f);
 			if((float)treasures.size() / originalTreasureCount * 100f <= winPercent){
 				Gameplay.levelCount++;
 				if(levelCount > maxLevelCount){

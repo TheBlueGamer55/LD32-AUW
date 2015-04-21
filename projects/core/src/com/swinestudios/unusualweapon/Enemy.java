@@ -5,7 +5,6 @@ import org.mini2Dx.core.graphics.Animation;
 import org.mini2Dx.core.graphics.Graphics;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
@@ -73,7 +72,6 @@ public class Enemy {
 
 	public Sprite left1, left2, right1, right2;
 	public Animation<Sprite> fishLeft, fishRight, fishCurrent;
-	//TODO adjust later
 	public float animationSpeed = 0.1f; //How many seconds a frame lasts
 
 	public Enemy(float x, float y, float width, float height, Gameplay level){
