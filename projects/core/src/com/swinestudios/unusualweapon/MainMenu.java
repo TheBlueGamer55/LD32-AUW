@@ -67,6 +67,8 @@ public class MainMenu implements GameScreen{
 		renderCave(g);
 		g.drawString("To be named later", 320, 240);
 		g.setBackgroundColor(new Color(26 / 255f, 168 / 255f, 196 / 255f, 0));
+		g.drawString("Max levels completed in one run: " + Gameplay.maxLevelCount, 36, 36);
+		g.drawString("Current run: " + Gameplay.levelCount, 36, 50);
 	}
 
 	@Override

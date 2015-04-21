@@ -24,6 +24,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Gameplay implements GameScreen{
 
 	public static int ID = 2;
+	
+	public static int maxLevelCount = 0;
+	public static int levelCount = 0;
+	public int originalTreasureCount;
+	public final int winPercent = 90; //TODO adjust later
+	
+	public int treasureCount = 0;
 
 	public float camX;
 	public float camY;
@@ -47,7 +54,7 @@ public class Gameplay implements GameScreen{
 	public Sound pop;
 
 	public final int treasureChance = 20; //Percent chance of treasure spawning at each "platform"
-	public final int enemyChance = 10; //Percent chance of enemies spawning at each "ceiling"
+	public final int enemyChance = 15; //Percent chance of enemies spawning at each "ceiling"
 
 	@Override
 	public int getId(){
@@ -89,6 +96,8 @@ public class Gameplay implements GameScreen{
 
 	@Override
 	public void preTransitionIn(Transition t){
+		gameOver = false;
+		paused = false;
 		foundEmptySpace = false;
 
 		solids = new ArrayList<Rectangle>();
@@ -112,6 +121,7 @@ public class Gameplay implements GameScreen{
 
 		spawnTreasure();
 		spawnEnemies();
+		originalTreasureCount = treasures.size();
 
 		//Input handling
 		InputMultiplexer multiplexer = new InputMultiplexer();
@@ -181,6 +191,14 @@ public class Gameplay implements GameScreen{
 				gameOver = true;
 			}
 			
+			if((float)treasures.size() / originalTreasureCount * 100f <= winPercent){
+				Gameplay.levelCount++;
+				if(levelCount > maxLevelCount){
+					maxLevelCount = levelCount;
+				}
+				this.preTransitionIn(new FadeOutTransition());
+			}
+			
 			if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
 				paused = true;
 			}
@@ -188,6 +206,7 @@ public class Gameplay implements GameScreen{
 		else{
 			if(gameOver){
 				if(Gdx.input.isKeyJustPressed(Keys.ESCAPE)){
+					Gameplay.levelCount = 0;
 					sm.enterGameScreen(MainMenu.ID, new FadeOutTransition(), new FadeInTransition());
 				}
 			}
